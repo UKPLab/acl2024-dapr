@@ -1,5 +1,7 @@
 # Document-Aware Passage Retrieval (DAPR)
 
+Paper draft: https://arxiv.org/abs/2305.13915 (work in progress)
+
 DAPR is a benchmark for document-aware passage retrieval: given a (large) collection of documents, relevant passages within these documents for a given query are required to be returned. 
 
 A key focus of DAPR is forcing/encouraging retrieval systems to utilize the document-level context which surrounds the relevant passages. An example is shown below:
