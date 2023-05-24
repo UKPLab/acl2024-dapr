@@ -99,7 +99,16 @@ bash bm25.sh
 ```
 > It requires JDK (openjdk>=11). One can install it via conda by `conda install openjdk=11`.
 ## Pre-Built Data
-The pre-built data for `NaturalQuestions`, `MSMARCO`, `MIRACL` and `Genomics` are also available: 
+The building processes above require relative large memory for the large datasets. The loading part after this data building is cheap though (the collections will be loaded on the fly). The budgets are listed below (with 12 multi-processes):
+| Dataset    | Memory |  Time |
+| -------- | ------- | ------- |
+| NaturalQuestions  | 25.6GB    | 39min    |
+| Genomics | 18.3GB     |25min    |
+| MSMARCO    | 102.9GB    |3h    |
+| MIRACL    | 69.7GB    |1h30min    |
+| COLIEE    | 3.4GB    |2min    |
+
+To bypass this, one can also use the pre-built data for `NaturalQuestions`, `MSMARCO`, `MIRACL` and `Genomics` are also available: 
 ```bash
 mkdir data
 wget -r -np -nH --cut-dirs=3 https://public.ukp.informatik.tu-darmstadt.de/kwang/dapr/v1/NaturalQuestions/ -P ./data

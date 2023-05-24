@@ -22,7 +22,7 @@ class DatasetConfig:
     chunk_size: int = 384
     tokenizer: str = "roberta-base"
     chunk_separator: Separator = Separator.empty
-    nprocs: int = 2
+    nprocs: int = 12
 
     @property
     def dataset_class(self) -> Type[BaseDataset]:
