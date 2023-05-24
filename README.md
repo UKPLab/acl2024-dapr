@@ -8,7 +8,7 @@ A key focus of DAPR is forcing/encouraging retrieval systems to utilize the docu
 
 <img src='imgs/motivative-example.png' width='300'>
 
-> In this example, the query asks for a musician or a group who has ever played at a certain venue. However, the gold relevant passage mentions only the reference noun, "the venue" but its actual name, "the Half Moon, Putney". The model thus needs to explore the context from belonging document of the passage, which in this case means coreference resolution.
+> In this example, the query asks for a musician or a group who has ever played at a certain venue. However, the gold relevant passage mentions only the reference noun, "the venue" but its actual name, "the Half Moon, Putney". The model thus needs to explore the context from the belonging document of the passage, which in this case means coreference resolution.
 
 ## Usage
 Python>=3.8 is required. Run this installation script below:
