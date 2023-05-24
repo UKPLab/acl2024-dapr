@@ -98,8 +98,8 @@ An example of the BM25 baseline is available:
 bash bm25.sh
 ```
 > It requires JDK (openjdk>=11). One can install it via conda by `conda install openjdk=11`.
-## Data
-The pre-build data for `NaturalQuestions`, `MSMARCO`, `MIRACL` and `Genomics` are also available: 
+## Pre-Built Data
+The pre-built data for `NaturalQuestions`, `MSMARCO`, `MIRACL` and `Genomics` are also available: 
 ```bash
 mkdir data
 wget -r -np -nH --cut-dirs=3 https://public.ukp.informatik.tu-darmstadt.de/kwang/dapr/v1/NaturalQuestions/ -P ./data
