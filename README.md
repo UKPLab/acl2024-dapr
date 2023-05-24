@@ -3,7 +3,9 @@
 DAPR is a benchmark for document-aware passage retrieval: given a (large) collection of documents, relevant passages within these documents for a given query are required to be returned. 
 
 A key focus of DAPR is forcing/encouraging retrieval systems to utilize the document-level context which surrounds the relevant passages. An example is shown below:
-![](imgs/motivative-example.png)
+
+<img src='imgs/motivative-example.png' width='300'>
+
 > In this example, the query asks for a musician or a group who has ever played at a certain venue. However, the gold relevant passage mentions only the reference noun, "the venue" but its actual name, "the Half Moon, Putney". The model thus needs to explore the context from belonging document of the passage, which in this case means coreference resolution.
 
 ## Usage
@@ -39,6 +41,8 @@ for labeled_query in dataset.loaded_data.labeled_queries_test:
             judged_chunk.judgement
         )
 ```
+> Note that the original datasets of COLIEE are only available for application. Please apply for the data following [the official guide](https://sites.ualberta.ca/~rabelo/COLIEE2023/#:~:text=Memorandum%20for%20Tasks%201%20and/or%202%20(Case%20law%20competition)) and set up the Google drive IDs to the environment variables: `COLIEE_TASK1_TRAIN_FILES`, `COLIEE_TASK2_TRAIN_FILES` and `COLIEE_TASK2_TRAIN_LABELS` before running the code.
+
 For evaluation, an example is as follows:
 ```python
 from dadpr.models.evaluation import LongDocumentEvaluator
@@ -92,3 +96,5 @@ An example of the BM25 baseline is available:
 bash bm25.sh
 ```
 > It requires JDK (openjdk>=11). One can install it via conda by `conda install openjdk=11`.
+## Data
+The pre-build data for `NaturalQuestions`, `MSMARCO`, `MIRACL` and `Genomics` are also available: https://public.ukp.informatik.tu-darmstadt.de/kwang/dapr/v1/
