@@ -8,7 +8,7 @@ from dapr.datasets.dm import Chunk, Document, Query
 from dapr.models.encoding import SimilarityFunction
 from dapr.utils import SOFT_ZERO
 import numpy as np
-from pyparsing import Optional
+from typing import Optional
 from transformers import AutoTokenizer
 import tqdm
 
