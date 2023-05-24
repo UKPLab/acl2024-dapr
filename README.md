@@ -47,7 +47,7 @@ for labeled_query in dataset.loaded_data.labeled_queries_test:
 
 For evaluation, an example is as follows:
 ```python
-from dadpr.models.evaluation import LongDocumentEvaluator
+from dapr.models.evaluation import LongDocumentEvaluator
 from dapr.datasets.dm import Split
 from dapr.models.dm import RetrievalLevel, RetrievedChunkList, ScoredChunk
 from dapr.hydra_schemas.dataset import NaturalQuestionsConfig
@@ -71,7 +71,7 @@ print(evaluation_scores)
 ```
 The evaluation for document retrieval is also available:
 ```python
-from dadpr.models.evaluation import LongDocumentEvaluator
+from dapr.models.evaluation import LongDocumentEvaluator
 from dapr.datasets.dm import Split
 from dapr.models.dm import RetrievalLevel, RetrievedDocumentList, ScoredDocument
 from dapr.hydra_schemas.dataset import NaturalQuestionsConfig
