@@ -88,7 +88,7 @@ retrieved = [
         ScoredDocument(doc_id="doc1", score=2.0),
     ]),
 ]
-evaluation_scores = evaluator(retrieved=retrieved, level=RetrievalLevel.chunk).summary
+evaluation_scores = evaluator(retrieved=retrieved, level=RetrievalLevel.document).summary
 print(evaluation_scores)
 ```
 An example of the BM25 baseline is available:
