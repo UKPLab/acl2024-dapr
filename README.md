@@ -108,7 +108,7 @@ The building processes above require relative large memory for the large dataset
 | MIRACL    | 69.7GB    |1h30min    |
 | COLIEE    | 3.4GB    |2min    |
 
-To bypass this, one can also use the pre-built data for `NaturalQuestions`, `MSMARCO`, `MIRACL` and `Genomics` are also available: 
+To bypass this, one can also download the pre-built data for `NaturalQuestions`, `MSMARCO`, `MIRACL` and `Genomics`: 
 ```bash
 mkdir data
 wget -r -np -nH --cut-dirs=3 https://public.ukp.informatik.tu-darmstadt.de/kwang/dapr/v1/NaturalQuestions/ -P ./data
