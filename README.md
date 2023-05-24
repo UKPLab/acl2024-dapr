@@ -28,7 +28,7 @@ from dapr.hydra_schemas.dataset import NaturalQuestionsConfig
 # os.environ["COLIEE_TASK2_TRAIN_LABELS"] = "<GOOGLE DRIVE ID of file  task2_train_labels_2023.json>"
 # from dapr.hydra_schemas.dataset import COLIEEConfig
 
-dataset = NaturalQuestionsConfig()()
+dataset = NaturalQuestionsConfig(cache_root_dir="data")()
 for doc in dataset.loaded_data.corpus_iter_fn():
     for chunk in doc.chunks:
         (chunk.chunk_id, chunk.text)
@@ -99,4 +99,11 @@ bash bm25.sh
 ```
 > It requires JDK (openjdk>=11). One can install it via conda by `conda install openjdk=11`.
 ## Data
-The pre-build data for `NaturalQuestions`, `MSMARCO`, `MIRACL` and `Genomics` are also available: https://public.ukp.informatik.tu-darmstadt.de/kwang/dapr/v1/
+The pre-build data for `NaturalQuestions`, `MSMARCO`, `MIRACL` and `Genomics` are also available: 
+```bash
+mkdir data
+wget -r -np -nH --cut-dirs=3 https://public.ukp.informatik.tu-darmstadt.de/kwang/dapr/v1/NaturalQuestions/ -P ./data
+wget -r -np -nH --cut-dirs=3 https://public.ukp.informatik.tu-darmstadt.de/kwang/dapr/v1/MSMARCO/ -P ./data
+wget -r -np -nH --cut-dirs=3 https://public.ukp.informatik.tu-darmstadt.de/kwang/dapr/v1/Genomics/ -P ./data
+wget -r -np -nH --cut-dirs=3 https://public.ukp.informatik.tu-darmstadt.de/kwang/dapr/v1/MIRACL/ -P ./data
+```
