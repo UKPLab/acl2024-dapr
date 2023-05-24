@@ -99,7 +99,7 @@ bash bm25.sh
 ```
 > It requires JDK (openjdk>=11). One can install it via conda by `conda install openjdk=11`.
 ## Pre-Built Data
-The building processes above require relative large memory for the large datasets. The loading part after this data building is cheap though (the collections will be loaded on the fly). The budgets are listed below (with 12 multi-processes):
+The building processes above require relative large memory for the large datasets. The loading part after this data building is cheap though (the collections will be loaded on the fly via Python generators). The budgets are listed below (with 12 multi-processes):
 | Dataset    | Memory |  Time |
 | -------- | ------- | ------- |
 | NaturalQuestions  | 25.6GB    | 39min    |
