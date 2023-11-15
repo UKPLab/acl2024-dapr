@@ -39,7 +39,6 @@ for labeled_query in dataset.loaded_data.labeled_queries_test:
             judged_chunk.judgement
         )
 ```
-> Note that the original datasets of COLIEE are only available for application. Please apply for the data following [the official guide](https://sites.ualberta.ca/~rabelo/COLIEE2023/#:~:text=Memorandum%20for%20Tasks%201%20and/or%202%20(Case%20law%20competition)) and set up the Google drive IDs to the environment variables: `COLIEE_TASK1_TRAIN_FILES`, `COLIEE_TASK2_TRAIN_FILES` and `COLIEE_TASK2_TRAIN_LABELS` before running the code.
 
 For evaluation, an example is as follows:
 ```python
