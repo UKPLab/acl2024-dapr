@@ -122,3 +122,4 @@ wget -r -np -nH --cut-dirs=3 https://public.ukp.informatik.tu-darmstadt.de/kwang
     - The MSMARCO dataset now segments the documents by keeping the labeled paragraphs while leaving the leftover parts as the other paragraphs.
         - For example, given the original unsegmented document text "11122222334444566" and if the labeled paragraphs are "22222" and "4444", then the segmentations will be ["111", "22222", "33", "4444", "566"].
         - We only do retrieval over the labeled paragraphs, which is specified by the attribute "candidate_chunk_ids" of each document object.
+    - We now use only the specific version of the ColBERT package, as the latest one has some unknown issue.
