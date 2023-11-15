@@ -212,14 +212,14 @@ class ColBERTV2Config(RetrieverConfig):
     max_length: Optional[int] = 512
 
 
-def register_retriever_config():
+def register_retriever_config(group: str = "retriever"):
     cs = ConfigStore.instance()
-    cs.store(group="retriever", name=BM25Config.name, node=BM25Config)
-    cs.store(group="retriever", name=NQDistilBERTConfig.name, node=NQDistilBERTConfig)
-    cs.store(group="retriever", name=RetroMAEBEIRConfig.name, node=RetroMAEBEIRConfig)
+    cs.store(group=group, name=BM25Config.name, node=BM25Config)
+    cs.store(group=group, name=NQDistilBERTConfig.name, node=NQDistilBERTConfig)
+    cs.store(group=group, name=RetroMAEBEIRConfig.name, node=RetroMAEBEIRConfig)
     cs.store(
-        group="retriever",
+        group=group,
         name=SPLADECoConDenserEnsembleDistilConfig.name,
         node=SPLADECoConDenserEnsembleDistilConfig,
     )
-    cs.store(group="retriever", name=ColBERTV2Config.name, node=ColBERTV2Config)
+    cs.store(group=group, name=ColBERTV2Config.name, node=ColBERTV2Config)

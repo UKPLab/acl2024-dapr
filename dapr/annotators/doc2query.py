@@ -4,7 +4,7 @@ import os
 import sys
 from typing import Dict, Iterable, List, Optional, Set, TypedDict, Union
 from dapr.annotators.base import BaseAnnotator
-from dapr.datasets.base import BaseDataset
+from dapr.datasets.base import BaseDataset, LoadedData
 import multiprocessing as mp
 from multiprocessing import Queue
 from multiprocessing.context import SpawnProcess
@@ -128,17 +128,17 @@ class Doc2QueryAnnotator(BaseAnnotator):
         self.ps: Optional[List[SpawnProcess]] = None
 
     # TODO: Merge these into base.py
-    def annotate(self, dataset: BaseDataset, cache_root_dir: str) -> None:
+    def annotate(self, data: LoadedData, cache_root_dir: str) -> None:
         """Annotate the doc_summary fields inplace."""
-        dataset.loaded_data.meta_data["corpus_identifier"] = "/".join(
+        data.meta_data["corpus_identifier"] = "/".join(
             [
-                dataset.loaded_data.meta_data["corpus_identifier"],
+                data.meta_data["corpus_identifier"],
                 self.__class__.__name__,
             ]
         )
         cache_fpath = os.path.join(
             cache_root_dir,
-            dataset.loaded_data.meta_data["corpus_identifier"],
+            data.meta_data["corpus_identifier"],
             "cid2gqs.jsonl",
         )
         if os.path.exists(cache_fpath):
@@ -165,9 +165,9 @@ class Doc2QueryAnnotator(BaseAnnotator):
                 raise e
 
         for lqs in [
-            dataset.loaded_data.labeled_queries_train,
-            dataset.loaded_data.labeled_queries_dev,
-            dataset.loaded_data.labeled_queries_test,
+            data.labeled_queries_train,
+            data.labeled_queries_dev,
+            data.labeled_queries_test,
         ]:
             if lqs is None:
                 continue
@@ -175,7 +175,7 @@ class Doc2QueryAnnotator(BaseAnnotator):
                 for jchk in lq.judged_chunks:
                     jchk.chunk.doc_summary = cid2gqs[jchk.chunk.chunk_id]
 
-        corpus_iter_fn = dataset.loaded_data.corpus_iter_fn
+        corpus_iter_fn = data.corpus_iter_fn
 
         def new_corpus_iter_fn() -> Iterable[Document]:
             for doc in corpus_iter_fn():
@@ -183,11 +183,10 @@ class Doc2QueryAnnotator(BaseAnnotator):
                     chk.text = "\n".join(cid2gqs[chk.chunk_id]) + "\n" + chk.text
                 yield doc
 
-        dataset.loaded_data.corpus_iter_fn = new_corpus_iter_fn
+        data.corpus_iter_fn = new_corpus_iter_fn
 
-    def _annotate(self, dataset: BaseDataset) -> Dict[str, str]:
+    def _annotate(self, data: LoadedData) -> Dict[str, str]:
         """Annotate the dataset and return cid2gqs."""
-        data = dataset.loaded_data
         cid2gqs = self.process(
             pool=data.corpus_iter_fn(),
             ndocs=data.meta_data["ndocs"],
@@ -237,7 +236,8 @@ class Doc2QueryAnnotator(BaseAnnotator):
             for gpu in range(ngpus)
         ]
         pbar = tqdm.tqdm(total=nchunks, desc="Doing Doc2Query--")
-        reduce_per = 5000
+        # reduce_per = 5000
+        reduce_per = 50000
         for p in tqdm.tqdm(self.ps, desc="Starting processes"):
             p.start()
 

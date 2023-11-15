@@ -1,6 +1,6 @@
 from typing import Dict, List
 from dapr.inference.base import BaseExperiment, Config
-from dapr.models.dm import rcls_x_rdls
+from dapr.models.dm import RetrievedDocumentList, rcls_x_rdls
 from dapr.models.encoding import SimilarityFunction
 from dapr.models.evaluation import EvaluationOutput, RetrievalLevel
 from dapr.models.retrieval.base import PoolingDocumentMethods
@@ -42,6 +42,14 @@ class SparsePooling(BaseExperiment):
                 retrieved=rcls, level=RetrievalLevel.chunk, report_prefix=approach
             )
             eouts.append(report_chunk)
+            # RDLs (C2D):
+            eouts.append(
+                evaluator(
+                    retrieved=[RetrievedDocumentList.from_rcl(rcl) for rcl in rcls],
+                    level=RetrievalLevel.document,
+                    report_prefix=f"{approach}-c2d",
+                )
+            )
         report_doc = evaluator(retrieved=rdls, level=RetrievalLevel.document)
         eouts.append(report_doc)
         return eouts
@@ -50,5 +58,5 @@ class SparsePooling(BaseExperiment):
 if __name__ == "__main__":
     SparsePooling().run()
 
-# export CUDA_VISIBLE_DEVICES=6; python -m dadpr.inference.sparse_pooling +dataset=nq +retriever="nq-distilbert-base-v1" retriever.doc_method="pooling_max" experiment.wandb=True
-# export CUDA_VISIBLE_DEVICES=6; python -m dadpr.inference.sparse_pooling +dataset=nq +retriever="splade-cocondenser-ensembledistil" retriever.doc_method="pooling_max" experiment.wandb=True
+# export CUDA_VISIBLE_DEVICES=6; python -m dapr.inference.sparse_pooling +dataset=nq +retriever="nq-distilbert-base-v1" retriever.doc_method="pooling_max" experiment.wandb=True
+# export CUDA_VISIBLE_DEVICES=6; python -m dapr.inference.sparse_pooling +dataset=nq +retriever="splade-cocondenser-ensembledistil" retriever.doc_method="pooling_max" experiment.wandb=True

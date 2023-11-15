@@ -161,6 +161,9 @@ class BM25Retriever(BaseRetriever):
         def rows() -> Iterable[PyseriniCollectionRow]:
             for doc in pool:
                 for chk in doc.chunks:
+                    if chk.chunk_id not in doc.candidate_chunk_ids:
+                        continue
+
                     title = chk.doc_summary if chk.doc_summary else ""
                     self.cid2did[chk.chunk_id] = doc.doc_id
                     yield PyseriniCollectionRow(

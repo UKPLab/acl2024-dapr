@@ -251,14 +251,16 @@ class NeuralRetriever(BaseRetriever):
                     assert doc_pooling
                     assert type(encoder) is not ColBERTEncoder
                     beginning_positions = np.cumsum(
-                        [0] + [len(doc.chunks) for doc in dbatch]
+                        [0] + [len(doc.candidate_chunk_ids) for doc in dbatch]
                     )
                     spans = zip(beginning_positions, beginning_positions[1:])
                     cembs_padded = pad_sequence(
                         sequences=[chunk_embs[b:e] for b, e in spans], batch_first=True
                     )  # (ndocs, chunk_length, hdim)
                     doc_mask = pad_sequence(
-                        sequences=[torch.ones(len(doc.chunks)) for doc in dbatch],
+                        sequences=[
+                            torch.ones(len(doc.candidate_chunk_ids)) for doc in dbatch
+                        ],
                         batch_first=True,
                     ).to(
                         device
@@ -332,9 +334,11 @@ class NeuralRetriever(BaseRetriever):
 
         # Start workers
         ctx = mp.get_context("spawn")
-        qin = ctx.Queue()
-        qout = ctx.Queue()
         ngpus = torch.cuda.device_count()
+        # reduce_per = 5000
+        reduce_per = 2500
+        qin = ctx.Queue(reduce_per)
+        qout = ctx.Queue(reduce_per // ngpus)
         self.logger.info(f"Using {ngpus} GPUs")
         self.ps = [
             ctx.Process(
@@ -358,7 +362,6 @@ class NeuralRetriever(BaseRetriever):
         ]
         pbar = tqdm.tqdm(total=total, desc="Searching")
         nput = 0
-        reduce_per = 5000
         for p in tqdm.tqdm(self.ps, desc="Starting processes"):
             p.start()
 
@@ -378,6 +381,8 @@ class NeuralRetriever(BaseRetriever):
                 for doc in dbatch:
                     doc_ids.append(doc.doc_id)
                     for chunk in doc.chunks:
+                        if chunk.chunk_id not in doc.candidate_chunk_ids:
+                            continue
                         chunk_ids.append(chunk.chunk_id)
                         did_per_chunk.append(doc.doc_id)
 

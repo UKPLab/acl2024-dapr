@@ -2,13 +2,12 @@ from __future__ import annotations
 from collections import defaultdict
 from dataclasses import dataclass
 from enum import Enum
-from typing import Dict, Iterable, List, Tuple, Type, TypedDict
+from typing import Dict, Iterable, List, Tuple, Type, TypedDict, Optional
 
 from dapr.datasets.dm import Chunk, Document, Query
 from dapr.models.encoding import SimilarityFunction
 from dapr.utils import SOFT_ZERO
 import numpy as np
-from typing import Optional
 from transformers import AutoTokenizer
 import tqdm
 
@@ -78,7 +77,6 @@ class ScoredDocument:
 
 
 class RetrievedChunkListJson(TypedDict):
-
     query_id: str
     scored_chunks: List[ScoredChunkJson]
 
@@ -187,7 +185,7 @@ class RetrievedDocumentList:
         """Sort the scored documents in the retrieval result."""
         return RetrievedDocumentList(
             query_id=self.query_id,
-            scored_document=ScoredDocument.sort(self.scored_documents),
+            scored_documents=ScoredDocument.sort(self.scored_documents),
             descending=True,
         )
 
@@ -236,6 +234,20 @@ class RetrievedDocumentList:
                 ScoredDocument(doc_id=sdoc_json["doc_id"], score=sdoc_json["score"])
             )
         return cls(query_id=rdl_json["query_id"], scored_documents=scored_documents)
+
+    @classmethod
+    def from_rcl(
+        cls: Type[RetrievedDocumentList], rcl: RetrievedChunkList
+    ) -> RetrievedDocumentList:
+        rdl = cls(query_id=rcl.query_id, scored_documents=[])
+        did2score = {}  # Keep only the best
+        for schk in rcl.scored_chunks:
+            if schk.score > did2score.get(schk.doc_id, 0):
+                did2score[schk.doc_id] = schk.score
+        for did, score in did2score.items():
+            sdoc = ScoredDocument(doc_id=did, score=score)
+            rdl.scored_documents.append(sdoc)
+        return rdl
 
 
 def normalize_min_max(scores: Dict[str, float]) -> Dict[str, float]:
@@ -449,7 +461,7 @@ def rcls_x_rcls(
             alphas = [None]
         for alpha in alphas:
             rcls = []
-            for (rcl1, rcl2) in tqdm.tqdm(
+            for rcl1, rcl2 in tqdm.tqdm(
                 zip(rcls1, rcls2),
                 desc=f"RCLs x RCLs -> RCLs ({rrc}, {alpha})",
                 total=len(rcls1),

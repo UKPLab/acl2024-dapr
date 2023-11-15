@@ -1,7 +1,8 @@
 from dataclasses import dataclass
 import inspect
 from typing import Optional, Type
-from dapr.datasets.coliee import COLIEE
+from dapr.datasets.conditionalqa import ConditionalQA
+from dapr.datasets.cleaned_conditionalqa import CleanedConditionalQA
 from dapr.datasets.miracl import MIRACL
 from omegaconf import MISSING
 from hydra.core.config_store import ConfigStore
@@ -15,6 +16,7 @@ from dapr.utils import Separator, build_init_args_with_kwargs_and_default
 
 @dataclass
 class DatasetConfig:
+    name: str = MISSING
     resource_path: str = MISSING
     min_plabel: int = MISSING  # Minimum of positive label
     nheldout: Optional[int] = None
@@ -22,7 +24,7 @@ class DatasetConfig:
     chunk_size: int = 384
     tokenizer: str = "roberta-base"
     chunk_separator: Separator = Separator.empty
-    nprocs: int = 12
+    nprocs: int = 10
 
     @property
     def dataset_class(self) -> Type[BaseDataset]:
@@ -40,6 +42,7 @@ class DatasetConfig:
 
 @dataclass
 class NaturalQuestionsConfig(DatasetConfig):
+    name: str = "nq"
     resource_path: str = (
         "https://huggingface.co/datasets/sentence-transformers/NQ-retrieval"
     )
@@ -53,6 +56,7 @@ class NaturalQuestionsConfig(DatasetConfig):
 
 @dataclass
 class MSMARCOConfig(DatasetConfig):
+    name: str = "msmarco"
     resource_path: str = "https://msmarco.blob.core.windows.net"
     min_plabel: int = 1
 
@@ -63,6 +67,7 @@ class MSMARCOConfig(DatasetConfig):
 
 @dataclass
 class GenomicsConfig(DatasetConfig):
+    name: str = "genomics"
     resource_path: str = ""  # We rely on ir_datasets
     min_plabel: int = 1
 
@@ -72,17 +77,8 @@ class GenomicsConfig(DatasetConfig):
 
 
 @dataclass
-class COLIEEConfig(DatasetConfig):
-    resource_path: str = ""  # COLIEE store files in separate addresses
-    min_plabel: int = 1
-
-    @property
-    def dataset_class(self) -> Type[BaseDataset]:
-        return COLIEE
-
-
-@dataclass
 class MIRACLConfig(DatasetConfig):
+    name: str = "miracl"
     resource_path: str = "https://huggingface.co/datasets/miracl"
     min_plabel: int = 1
 
@@ -91,10 +87,41 @@ class MIRACLConfig(DatasetConfig):
         return MIRACL
 
 
-def register_dataset_config():
+@dataclass
+class ConditionalQAConfig(DatasetConfig):
+    name: str = "conditionalqa"
+    resource_path: str = (
+        "https://raw.githubusercontent.com/haitian-sun/ConditionalQA/master/v1_0"
+    )
+    min_plabel: int = 1
+
+    @property
+    def dataset_class(self) -> Type[BaseDataset]:
+        return ConditionalQA
+
+
+@dataclass
+class CleanedConditionalQAConfig(DatasetConfig):
+    name: str = "cleaned_conditionalqa"
+    resource_path: str = (
+        "https://raw.githubusercontent.com/haitian-sun/ConditionalQA/master/v1_0"
+    )
+    min_plabel: int = 1
+
+    @property
+    def dataset_class(self) -> Type[BaseDataset]:
+        return CleanedConditionalQA
+
+
+def register_dataset_config(group: str = "dataset"):
     cs = ConfigStore.instance()
-    cs.store(group="dataset", name="nq", node=NaturalQuestionsConfig)
-    cs.store(group="dataset", name="msmarco", node=MSMARCOConfig)
-    cs.store(group="dataset", name="genomics", node=GenomicsConfig)
-    cs.store(group="dataset", name="coliee", node=COLIEEConfig)
-    cs.store(group="dataset", name="miracl", node=MIRACLConfig)
+    cs.store(group=group, name=NaturalQuestionsConfig.name, node=NaturalQuestionsConfig)
+    cs.store(group=group, name=MSMARCOConfig.name, node=MSMARCOConfig)
+    cs.store(group=group, name=GenomicsConfig.name, node=GenomicsConfig)
+    cs.store(group=group, name=MIRACLConfig.name, node=MIRACLConfig)
+    cs.store(group=group, name=ConditionalQAConfig.name, node=ConditionalQAConfig)
+    cs.store(
+        group=group,
+        name=CleanedConditionalQAConfig.name,
+        node=CleanedConditionalQAConfig,
+    )

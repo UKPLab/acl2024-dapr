@@ -130,7 +130,7 @@ class BaseExperiment(ABC):
         if annotator is not None:
             self.logger.info("Annotating")
             annotator.annotate(
-                dataset=dataset, cache_root_dir=cfg.experiment.results_dir
+                data=dataset.loaded_data, cache_root_dir=cfg.experiment.results_dir
             )
 
         self.logger.info("Instantiating evaluator")

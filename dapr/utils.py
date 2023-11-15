@@ -35,6 +35,7 @@ import tqdm
 import shutil
 import zipfile
 import numpy as np
+from nltk.tokenize import TextTilingTokenizer, sent_tokenize
 from torch.utils.checkpoint import get_device_states, set_device_states
 import git
 
@@ -313,6 +314,17 @@ def concat_and_chunk(
         yield sequences_concatenated[b:e], any(marked_broadcasted[b:e])
 
 
+def texttiling(text: str, w: int = 10, k: int = 2) -> List[str]:
+    """Segmenting text into topically separate paragraphs via TextTiling."""
+    DOUBLE_NEWLINES = "\n\n"
+    tt = TextTilingTokenizer(w=w, k=k)
+    try:
+        tokenized: List[str] = tt.tokenize(DOUBLE_NEWLINES.join(sent_tokenize(text)))
+    except ValueError:
+        return [text]
+    return [seg.replace(DOUBLE_NEWLINES, " ").strip() for seg in tokenized]
+
+
 class Separator(str, Enum):
     bert_sep = "[SEP]"
     roberta_sep = "</s>"
@@ -446,8 +458,8 @@ class Multiprocesser:
         chunk_size: int = 5000,
     ) -> List[O]:
         ctx = mp.get_context("spawn")
-        qin = ctx.Queue()
-        qout = ctx.Queue()
+        qin = ctx.Queue(chunk_size)
+        qout = ctx.Queue(chunk_size // self.nprocs)
         self.ps = [
             ctx.Process(target=self._worker, args=(qin, qout, func), daemon=True)
             for _ in range(self.nprocs)
@@ -615,7 +627,6 @@ class HF_ColBERT(BertPreTrainedModel):
 
     @staticmethod
     def raw_tokenizer_from_pretrained(name_or_path: str) -> BertTokenizer:
-
         if name_or_path.endswith(".dnn"):
             dnn = torch_load_dnn(name_or_path)
             base = dnn.get("arguments", {}).get("model", "bert-base-uncased")

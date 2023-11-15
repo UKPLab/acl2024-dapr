@@ -69,26 +69,22 @@ class Doc2QueryAnnotatorConfig(AnnotatorConfig):
         )
 
 
-def register_annotator_config():
+def register_annotator_config(group: str = "annotator"):
     cs = ConfigStore.instance()
     cs.store(
-        group="annotator",
+        group=group,
         name=TopicRankAnnotatorConfig.name,
         node=TopicRankAnnotatorConfig,
     )
+    cs.store(group=group, name=TitleAnnotatorConfig.name, node=TitleAnnotatorConfig)
+    cs.store(group=group, name=EmptyAnnotatorConfig.name, node=EmptyAnnotatorConfig)
     cs.store(
-        group="annotator", name=TitleAnnotatorConfig.name, node=TitleAnnotatorConfig
-    )
-    cs.store(
-        group="annotator", name=EmptyAnnotatorConfig.name, node=EmptyAnnotatorConfig
-    )
-    cs.store(
-        group="annotator",
+        group=group,
         name=LeadingSentencesAnnotatorConfig.name,
         node=LeadingSentencesAnnotatorConfig,
     )
     cs.store(
-        group="annotator",
+        group=group,
         name=Doc2QueryAnnotatorConfig.name,
         node=Doc2QueryAnnotatorConfig,
     )

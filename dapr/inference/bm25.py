@@ -1,4 +1,5 @@
 from typing import Dict, List
+from dapr.models.dm import RetrievedDocumentList
 from dapr.hydra_schemas.retrieval import BM25Config
 from dapr.inference.base import BaseExperiment, Config
 from dapr.models.evaluation import EvaluationOutput, RetrievalLevel
@@ -16,12 +17,20 @@ class BM25(BaseExperiment):
         report_chunk = evaluator(retrieved=rcls, level=RetrievalLevel.chunk)
         report_doc = evaluator(retrieved=rdls, level=RetrievalLevel.document)
         eouts = [report_chunk, report_doc]
+        # RDLs (C2D):
+        eouts.append(
+            evaluator(
+                retrieved=[RetrievedDocumentList.from_rcl(rcl) for rcl in rcls],
+                level=RetrievalLevel.document,
+                report_prefix="c2d",
+            )
+        )
         return eouts
 
 
 if __name__ == "__main__":
     BM25().run()
 
-# nohup python -m dadpr.inference.bm25 +dataset=nq experiment.wandb=True > bm25-nq.log&
-# nohup python -m dadpr.inference.bm25 +dataset=genomics experiment.wandb=True > bm25-genomics.log &
-# nohup python -m dadpr.inference.bm25 +dataset=msmarco experiment.wandb=True > bm25-msmarco.log &
+# nohup python -m dapr.inference.bm25 +dataset=nq experiment.wandb=True > bm25-nq.log&
+# nohup python -m dapr.inference.bm25 +dataset=genomics experiment.wandb=True > bm25-genomics.log &
+# nohup python -m dapr.inference.bm25 +dataset=msmarco experiment.wandb=True > bm25-msmarco.log &

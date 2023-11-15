@@ -11,6 +11,7 @@ from typing import (
     Iterable,
     List,
     Optional,
+    Set,
     Tuple,
     Type,
     TypedDict,
@@ -71,11 +72,17 @@ class Chunk:
             "text": self.text,
         }
 
+    def chunk_position(self) -> int:
+        doc = self.belonging_doc
+        chunk_ids = [chunk.chunk_id for chunk in doc.chunks]
+        return chunk_ids.index(self.chunk_id)
+
 
 class DocumentJson(TypedDict):
     id: str
     title: Optional[str]
     chunks: List[ChunkJson]
+    candidate_chunk_ids: Optional[List[str]]
 
 
 @dataclass
@@ -85,6 +92,13 @@ class Document:
     doc_id: str
     chunks: List[Chunk]
     title: Optional[str]
+    candidate_chunk_ids: Optional[
+        Set[str]
+    ] = None  # Which chunks are candidates for retrieval. Mainly for MSMARCO
+
+    def set_default_candidates(self) -> None:
+        if self.candidate_chunk_ids is None:
+            self.candidate_chunk_ids = {chk.chunk_id for chk in self.chunks}
 
     @property
     def cid2chunk(self) -> Dict[str, Chunk]:
@@ -99,14 +113,24 @@ class Document:
         return cid2chunk
 
     @staticmethod
-    def nchunks_in_corpus(corpus: Iterable[Document]) -> int:
-        return sum(len(doc.chunks) for doc in corpus)
+    def nchunks_in_corpus(
+        corpus: Iterable[Document], candidates_only: bool = False
+    ) -> int:
+        return sum(
+            len(doc.candidate_chunk_ids) if candidates_only else len(doc.chunks)
+            for doc in corpus
+        )
 
     @staticmethod
     def nchunks_percentiles(
-        corpus: Iterable[Document], percentiles: Tuple[int] = (5, 25, 50, 75, 95)
+        corpus: Iterable[Document],
+        percentiles: Tuple[int] = (5, 25, 50, 75, 95),
+        candidates_only: bool = False,
     ) -> Dict[int, float]:
-        nchunks_list = [len(doc.chunks) for doc in corpus]
+        nchunks_list = [
+            len(doc.candidate_chunk_ids) if candidates_only else len(doc.chunks)
+            for doc in corpus
+        ]
         result = {
             percentile: np.percentile(nchunks_list, percentile)
             for percentile in percentiles
@@ -135,6 +159,9 @@ class Document:
             "id": self.doc_id,
             "title": self.title,
             "chunks": [chunk.to_json() for chunk in self.chunks],
+            "candidate_chunk_ids": list(self.candidate_chunk_ids)
+            if self.candidate_chunk_ids is not None
+            else None,
         }
 
     @classmethod
@@ -149,6 +176,9 @@ class Document:
             )
             for chk_json in doc_json["chunks"]
         ]
+        if doc_json.get("candidate_chunk_ids") is not None:
+            candidate_chunk_ids = set(doc_json["candidate_chunk_ids"])
+            document.candidate_chunk_ids = candidate_chunk_ids
         return document
 
     @staticmethod
@@ -303,6 +333,23 @@ class LabeledQuery:
             "judged_chunks": [jchk.to_json() for jchk in self.judged_chunks],
         }
 
+    @staticmethod
+    def merge(labeled_queries: List[LabeledQuery]) -> List[LabeledQuery]:
+        """Merge labeled queries with the same query ID into one."""
+        qid2query = {lq.query.query_id: lq.query for lq in labeled_queries}
+        qid2jchks: Dict[str, List[JudgedChunk]] = {}
+        for lq in labeled_queries:
+            for jchk in lq.judged_chunks:
+                qid = jchk.query.query_id
+                qid2jchks.setdefault(qid, [])
+                qid2jchks[qid].append(jchk)
+        lqs = []
+        for qid, query in qid2query.items():
+            jchks = qid2jchks[qid]
+            lq = LabeledQuery(query=query, judged_chunks=jchks)
+            lqs.append(lq)
+        return lqs
+
 
 class MetaDataJson(TypedDict):
     chunk_separator: str
@@ -311,8 +358,11 @@ class MetaDataJson(TypedDict):
     name: str
     ndocs: int
     nchunks: int
+    nchunks_candidates: Optional[int]
     nchunks_percentiles: Dict[int, float]
+    nchunks_candidates_percentiles: Optional[int]
     avg_chunk_length: float
+    avg_candidate_chunk_length: Optional[int]
     nqueries_train: Optional[int]
     nqueries_dev: Optional[int]
     nqueries_test: int
@@ -360,67 +410,75 @@ class LoadedData:
         with open(os.path.join(output_dir, "meta_data.json"), "w") as f:
             f.write(ujson.dumps(self.meta_data, indent=4))
 
+    @staticmethod
+    def build_corpus_iter_fn(fpath: str) -> Iterable[Document]:
+        with open(fpath) as f:
+            for line in f:
+                doc_json: DocumentJson = ujson.loads(line)
+                document = Document.from_json(doc_json)
+                document.set_default_candidates()  # Also for compatibility with the older version
+                yield document
+
+    @staticmethod
+    def load_labeled_queries(
+        fpath: str, total: int, pbar: bool
+    ) -> Optional[List[LabeledQuery]]:
+        if not os.path.exists(fpath):
+            return None
+
+        labeled_queries: List[LabeledQuery] = []
+        with open(fpath) as f:
+            for line in tqdm.tqdm(
+                f, total=total, desc=f"Loading from {fpath}", disable=not pbar
+            ):
+                lq_json: LabeledQueryJson = ujson.loads(line)
+                query_json = lq_json["query"]
+                query = Query(query_id=query_json["id"], text=query_json["text"])
+                judged_chunk_jsons = lq_json["judged_chunks"]
+                judged_chunks = []
+                for jchk_json in judged_chunk_jsons:
+                    document = Document.from_json(jchk_json["belonging_doc"])
+                    chunk_json: ChunkJson = jchk_json["chunk"]
+                    chunk = Chunk(
+                        chunk_id=chunk_json["id"],
+                        text=chunk_json["text"],
+                        doc_summary=None,
+                        belonging_doc=document,
+                    )
+                    jchk = JudgedChunk(
+                        query=query, chunk=chunk, judgement=jchk_json["judgement"]
+                    )
+                    judged_chunks.append(jchk)
+                labeled_query = LabeledQuery(query=query, judged_chunks=judged_chunks)
+                labeled_queries.append(labeled_query)
+        return labeled_queries
+
     @classmethod
-    def from_dump(cls: Type[LoadedData], dump_dir: str) -> LoadedData:
+    def from_dump(
+        cls: Type[LoadedData], dump_dir: str, pbar: bool = True
+    ) -> LoadedData:
         with open(os.path.join(dump_dir, "meta_data.json")) as f:
             meta_data: MetaDataJson = ujson.load(f)
             meta_data["chunk_separator"] = Separator(meta_data["chunk_separator"])
 
-        def build_corpus_iter_fn(fpath: str) -> Iterable[Document]:
-            with open(fpath) as f:
-                for line in f:
-                    doc_json: DocumentJson = ujson.loads(line)
-                    document = Document.from_json(doc_json)
-                    yield document
-
-        def load_labeled_queries(
-            fpath: str, total: int
-        ) -> Optional[List[LabeledQuery]]:
-            if not os.path.exists(fpath):
-                return None
-
-            labeled_queries: List[LabeledQuery] = []
-            with open(fpath) as f:
-                for line in tqdm.tqdm(f, total=total, desc=f"Loading from {fpath}"):
-                    lq_json: LabeledQueryJson = ujson.loads(line)
-                    query_json = lq_json["query"]
-                    query = Query(query_id=query_json["id"], text=query_json["text"])
-                    judged_chunk_jsons = lq_json["judged_chunks"]
-                    judged_chunks = []
-                    for jchk_json in judged_chunk_jsons:
-                        document = Document.from_json(jchk_json["belonging_doc"])
-                        chunk_json: ChunkJson = jchk_json["chunk"]
-                        chunk = Chunk(
-                            chunk_id=chunk_json["id"],
-                            text=chunk_json["text"],
-                            doc_summary=None,
-                            belonging_doc=document,
-                        )
-                        jchk = JudgedChunk(
-                            query=query, chunk=chunk, judgement=jchk_json["judgement"]
-                        )
-                        judged_chunks.append(jchk)
-                    labeled_query = LabeledQuery(
-                        query=query, judged_chunks=judged_chunks
-                    )
-                    labeled_queries.append(labeled_query)
-            return labeled_queries
-
         loaded_data = cls(
             corpus_iter_fn=partial(
-                build_corpus_iter_fn, os.path.join(dump_dir, "corpus.jsonl")
+                cls.build_corpus_iter_fn, os.path.join(dump_dir, "corpus.jsonl")
             ),
-            labeled_queries_train=load_labeled_queries(
+            labeled_queries_train=cls.load_labeled_queries(
                 fpath=os.path.join(dump_dir, "train.jsonl"),
                 total=meta_data["nqueries_train"],
+                pbar=pbar,
             ),
-            labeled_queries_dev=load_labeled_queries(
+            labeled_queries_dev=cls.load_labeled_queries(
                 fpath=os.path.join(dump_dir, "dev.jsonl"),
                 total=meta_data["nqueries_dev"],
+                pbar=pbar,
             ),
-            labeled_queries_test=load_labeled_queries(
+            labeled_queries_test=cls.load_labeled_queries(
                 fpath=os.path.join(dump_dir, "test.jsonl"),
                 total=meta_data["nqueries_test"],
+                pbar=pbar,
             ),
             meta_data=meta_data,
         )

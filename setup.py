@@ -24,7 +24,7 @@ setup(
     ],
     python_requires=">=3.8",
     install_requires=[
-        "colbert @ git+https://github.com/stanford-futuredata/ColBERT.git",
+        "colbert @ git+https://github.com/stanford-futuredata/ColBERT.git@21b460a606bed606e8a7fa105ada36b18e8084ec",
         "ujson",
         "wandb",
         "datasets",
@@ -39,6 +39,6 @@ setup(
         "pke @ git+https://github.com/boudinfl/pke.git",
         "gdown",
         "ir_datasets",
-        "pyserini"
+        "pyserini",
     ],
 )

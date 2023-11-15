@@ -1,12 +1,11 @@
 from itertools import chain
 from typing import Dict
 from dapr.annotators.base import BaseAnnotator
-from dapr.datasets.base import BaseDataset
+from dapr.datasets.base import LoadedData
 
 
 class TitleAnnotator(BaseAnnotator):
-    def _annotate(self, dataset: BaseDataset) -> Dict[str, str]:
-        data = dataset.loaded_data
+    def _annotate(self, data: LoadedData) -> Dict[str, str]:
         assert data.corpus_iter_fn is not None
 
         did2dsum: Dict[str, str] = {}

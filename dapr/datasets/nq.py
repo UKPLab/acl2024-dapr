@@ -203,6 +203,7 @@ class NaturalQuestions(BaseDataset):
             document.chunks.append(chunk)
             if positive:
                 judged_chunks.append(JudgedChunk(query=query, chunk=chunk, judgement=1))
+        document.set_default_candidates()
 
         if judged:
             return judged_chunks

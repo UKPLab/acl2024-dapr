@@ -1,6 +1,6 @@
 from typing import Dict, List
 from dapr.inference.base import BaseExperiment, Config
-from dapr.models.dm import rcls_x_rdls
+from dapr.models.dm import RetrievedDocumentList, rcls_x_rdls
 from dapr.models.encoding import SimilarityFunction
 from dapr.models.evaluation import EvaluationOutput, RetrievalLevel
 
@@ -31,6 +31,14 @@ class BM25DocBM25Chunk(BaseExperiment):
                 retrieved=rcls, level=RetrievalLevel.chunk, report_prefix=approach
             )
             eouts.append(report_chunk)
+            # RDLs (C2D):
+            eouts.append(
+                evaluator(
+                    retrieved=[RetrievedDocumentList.from_rcl(rcl) for rcl in rcls],
+                    level=RetrievalLevel.document,
+                    report_prefix=f"{approach}-c2d",
+                )
+            )
         report_doc = evaluator(retrieved=rdls, level=RetrievalLevel.document)
         eouts.append(report_doc)
         return eouts
@@ -39,6 +47,6 @@ class BM25DocBM25Chunk(BaseExperiment):
 if __name__ == "__main__":
     BM25DocBM25Chunk().run()
 
-# nohup python -m dadpr.inference.bm25_doc_bm25_chunk +dataset=nq experiment.wandb=True > bm25_doc_bm25_chunk-nq.log&
-# nohup python -m dadpr.inference.bm25_doc_bm25_chunk +dataset=genomics experiment.wandb=True > bm25_doc_bm25_chunk-genomics.log &
-# nohup python -m dadpr.inference.bm25_doc_bm25_chunk +dataset=msmarco experiment.wandb=True > bm25_doc_bm25_chunk-msmarco.log &
+# nohup python -m dapr.inference.bm25_doc_bm25_chunk +dataset=nq experiment.wandb=True > bm25_doc_bm25_chunk-nq.log&
+# nohup python -m dapr.inference.bm25_doc_bm25_chunk +dataset=genomics experiment.wandb=True > bm25_doc_bm25_chunk-genomics.log &
+# nohup python -m dapr.inference.bm25_doc_bm25_chunk +dataset=msmarco experiment.wandb=True > bm25_doc_bm25_chunk-msmarco.log &

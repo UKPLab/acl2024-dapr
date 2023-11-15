@@ -28,7 +28,6 @@ class BaseDataset(ABC):
         self.kwargs.pop("nprocs")
         self.logger = logging.getLogger(__name__)
         self.resource_path = resource_path
-        self._download(resource_path)
         self.chunk_separator = chunk_separator
         self.tokenizer = AutoTokenizer.from_pretrained(tokenizer)
         self.chunk_size = chunk_size
@@ -37,6 +36,7 @@ class BaseDataset(ABC):
         if os.path.exists(cache_dir) and os.listdir(cache_dir):
             loaded_data = LoadedData.from_dump(cache_dir)
         else:
+            self._download(resource_path)
             loaded_data = self.load_data(nheldout=nheldout, cache_dir=cache_dir)
         self.loaded_data = loaded_data
 
@@ -44,8 +44,18 @@ class BaseDataset(ABC):
     def name(self) -> str:
         return self.__class__.__name__
 
-    def estimate_chunk_length(self, corpus: Iterable[Document], n: int = 1000) -> float:
-        chunks = [chk for doc in corpus for chk in doc.chunks]
+    def estimate_chunk_length(
+        self, corpus: Iterable[Document], n: int = 1000, candidates_only: bool = False
+    ) -> float:
+        if candidates_only:
+            chunks = [
+                chk
+                for doc in corpus
+                for chk in doc.chunks
+                if chk.chunk_id in doc.candidate_chunk_ids
+            ]
+        else:
+            chunks = [chk for doc in corpus for chk in doc.chunks]
         random_state = Random(42)
         sampled = random_state.sample(chunks, k=min(n, len(chunks)))
         lengths = [len(self.tokenizer.tokenize(chunk.text)) for chunk in sampled]
@@ -59,11 +69,20 @@ class BaseDataset(ABC):
             "name": self.name,
             "ndocs": corpus_size,
             "nchunks": Document.nchunks_in_corpus(loaded_data.corpus_iter_fn()),
+            "nchunks_candidates": Document.nchunks_in_corpus(
+                loaded_data.corpus_iter_fn(), candidates_only=True
+            ),
             "nchunks_percentiles": Document.nchunks_percentiles(
                 corpus=loaded_data.corpus_iter_fn()
             ),
+            "nchunks_candidates_percentiles": Document.nchunks_percentiles(
+                corpus=loaded_data.corpus_iter_fn(), candidates_only=True
+            ),
             "avg_chunk_length": self.estimate_chunk_length(
                 loaded_data.corpus_iter_fn()
+            ),
+            "avg_candidate_chunk_length": self.estimate_chunk_length(
+                loaded_data.corpus_iter_fn(), candidates_only=True
             ),
         }
         for split, lqs in [
@@ -96,7 +115,9 @@ class BaseDataset(ABC):
             for lq in lqs:
                 for jc in lq.judged_chunks:
                     cids_heldout.add(jc.chunk.chunk_id)
-        assert len(cids_heldout - cids_coprus) == 0
+
+        cids_left = cids_heldout - cids_coprus
+        assert len(cids_heldout - cids_coprus) == 0, f"Left: {cids_left}"
 
     @abstractmethod
     def _download(self, resource_path: str) -> None:

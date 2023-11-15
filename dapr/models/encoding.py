@@ -52,7 +52,6 @@ import math
 class TextFeatures:
     input_ids: torch.Tensor  # (bsz, chunk_size)
     attention_mask: torch.Tensor  # (bsz, chunk_size)
-    other_cls_positions: Optional[torch.Tensor] = None  # (bsz, nchunks)
 
     def __len__(self) -> int:
         return len(self.input_ids)
@@ -61,9 +60,6 @@ class TextFeatures:
         return TextFeatures(
             input_ids=self.input_ids[subscript],
             attention_mask=self.attention_mask[subscript],
-            other_cls_positions=self.other_cls_positions[subscript]
-            if self.other_cls_positions is not None
-            else None,
         )
 
 
@@ -232,23 +228,19 @@ class TextEncoder(ABC, torch.nn.Module):
 
     def tokenize_documents(self, documents: List[Document]) -> TextFeatures:
         chunk_texts = []
-        max_nchunks = max(len(doc.chunks) for doc in documents)
+        max_nchunks = max(len(doc.candidate_chunk_ids) for doc in documents)
         if self.max_nchunks is not None:
             max_nchunks = min(self.max_nchunks, max_nchunks)
-
-        # Build cls positions:
-        other_cls_positions: List[List[int]] = []
         for doc in documents:
-            cls_positions = [
-                [
-                    position + len(chunk_texts)
-                    for position in range(max_nchunks)
-                    if position != b
-                ]
-                for b in range(len(doc.chunks))
-            ]
-            other_cls_positions.extend(cls_positions)
-            chunk_texts.extend(map(self.chunk2text, doc.chunks))
+            chunk_texts.extend(
+                map(
+                    self.chunk2text,
+                    filter(
+                        lambda chunk: chunk.chunk_id in doc.candidate_chunk_ids,
+                        doc.chunks,
+                    ),
+                )
+            )
 
         # Build other features:
         tokenized: BatchEncoding = self.tokenizer(
@@ -262,11 +254,7 @@ class TextEncoder(ABC, torch.nn.Module):
         # Assembly:
         input_ids: torch.Tensor = tokenized["input_ids"]
         attention_mask: torch.Tensor = tokenized["attention_mask"]
-        text_features = TextFeatures(
-            input_ids=input_ids,
-            attention_mask=attention_mask,
-            other_cls_positions=torch.LongTensor(other_cls_positions).to(self.device),
-        )
+        text_features = TextFeatures(input_ids=input_ids, attention_mask=attention_mask)
         return text_features
 
     @abstractmethod
@@ -299,7 +287,6 @@ class SingleVectorEncoder(TextEncoder):
 
     def forward(self, text_features: TextFeatures) -> torch.Tensor:
         features = text_features.__dict__
-        features.pop("other_cls_positions")
         token_embeddings: torch.Tensor = self.model(**features, return_dict=False)[0]
         pooled = self.pooling(
             token_embeddings=token_embeddings,
@@ -339,11 +326,12 @@ class SingleVectorEncoder(TextEncoder):
         self.eval()
         chunk_embs = []
         features = self.tokenize_documents(documents)
-        for b in range(0, len(features), batch_size_chunk):
-            e = b + batch_size_chunk
-            embs = self.forward(features[b:e])
-            chunk_embs.append(embs)
-        chunk_embs = torch.cat(chunk_embs, dim=0)
+        with torch.cuda.amp.autocast():
+            for b in range(0, len(features), batch_size_chunk):
+                e = b + batch_size_chunk
+                embs = self.forward(features[b:e])
+                chunk_embs.append(embs)
+            chunk_embs = torch.cat(chunk_embs, dim=0)
         return EmbeddingsWithMask(embeddings=chunk_embs)
 
 
@@ -383,7 +371,10 @@ class ColBERTEncoder(TextEncoder):
     ) -> EmbeddingsWithMask:
         model: Checkpoint = self.model
         chunk_texts = [
-            self.chunk2text(chunk) for doc in documents for chunk in doc.chunks
+            self.chunk2text(chunk)
+            for doc in documents
+            for chunk in doc.chunks
+            if chunk.chunk_id in doc.candidate_chunk_ids
         ]
         chunk_embs, chunk_lengths = model.docFromText(
             docs=chunk_texts,
@@ -399,7 +390,6 @@ class ColBERTEncoder(TextEncoder):
 
 
 class EncoderType(str, Enum):
-
     single_vector = "single_vector"
     colbert = "colbert"
 

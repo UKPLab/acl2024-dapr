@@ -1,15 +1,12 @@
 from __future__ import annotations
 from enum import Enum
 from functools import partial
-from itertools import chain
-import os
 from typing import Dict, Iterable, List, Tuple
-from dapr.datasets.base import BaseDataset, LoadedData
+from dapr.datasets.base import LoadedData
 from dapr.datasets.dm import Document
-from dapr.utils import Multiprocesser, cache_to_disk
+from dapr.utils import Multiprocesser
 from pke.base import LoadFile
 from pke.unsupervised import TopicRank
-from multiprocessing.queues import Queue
 from dapr.annotators.base import BaseAnnotator
 
 MAX_LENGTH = 65536  # <= 10*6 Required by spaCy, 65536 takes around 12s already
@@ -94,8 +91,7 @@ class PKEAnnotator(BaseAnnotator):
 
         return doc_id2kps
 
-    def _annotate(self, dataset: BaseDataset) -> Dict[str, str]:
-        data = dataset.loaded_data
+    def _annotate(self, data: LoadedData) -> Dict[str, str]:
         assert data.corpus_iter_fn is not None
         extract_fn = self.extract
         doc_id2kps = extract_fn(data)

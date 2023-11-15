@@ -22,11 +22,7 @@ from dapr.hydra_schemas.dataset import NaturalQuestionsConfig
 # from dapr.hydra_schemas.dataset import MSMARCOConfig
 # from dapr.hydra_schemas.dataset import GenomicsConfig
 # from dapr.hydra_schemas.dataset import MIRACLConfig
-# import os  # Please apply for the official COLIEE data and paste its Google drive IDs below:
-# os.environ["COLIEE_TASK1_TRAIN_FILES"] = "<GOOGLE DRIVE ID of file task1_train_files_2023.zip>"
-# os.environ["COLIEE_TASK2_TRAIN_FILES"] = "<GOOGLE DRIVE ID of file task2_train_files_2023.zip>"
-# os.environ["COLIEE_TASK2_TRAIN_LABELS"] = "<GOOGLE DRIVE ID of file  task2_train_labels_2023.json>"
-# from dapr.hydra_schemas.dataset import COLIEEConfig
+# from dapr.hydra_schemas.dataset import CleanedConditionalQA
 
 dataset = NaturalQuestionsConfig(cache_root_dir="data")()
 for doc in dataset.loaded_data.corpus_iter_fn():
@@ -106,13 +102,23 @@ The building processes above require relative large memory for the large dataset
 | Genomics | 18.3GB     |25min    |
 | MSMARCO    | 102.9GB    |3h    |
 | MIRACL    | 69.7GB    |1h30min    |
-| COLIEE    | 3.4GB    |2min    |
+| ConditionalQA    |   | |
 
 To bypass this, one can also download the pre-built data for `NaturalQuestions`, `MSMARCO`, `MIRACL` and `Genomics`: 
 ```bash
 mkdir data
-wget -r -np -nH --cut-dirs=3 https://public.ukp.informatik.tu-darmstadt.de/kwang/dapr/v1/NaturalQuestions/ -P ./data
-wget -r -np -nH --cut-dirs=3 https://public.ukp.informatik.tu-darmstadt.de/kwang/dapr/v1/MSMARCO/ -P ./data
-wget -r -np -nH --cut-dirs=3 https://public.ukp.informatik.tu-darmstadt.de/kwang/dapr/v1/Genomics/ -P ./data
-wget -r -np -nH --cut-dirs=3 https://public.ukp.informatik.tu-darmstadt.de/kwang/dapr/v1/MIRACL/ -P ./data
+wget -r -np -nH --cut-dirs=3 https://public.ukp.informatik.tu-darmstadt.de/kwang/dapr/v3/NaturalQuestions/ -P ./data
+wget -r -np -nH --cut-dirs=3 https://public.ukp.informatik.tu-darmstadt.de/kwang/dapr/v3/MSMARCO/ -P ./data
+wget -r -np -nH --cut-dirs=3 https://public.ukp.informatik.tu-darmstadt.de/kwang/dapr/v3/Genomics/ -P ./data
+wget -r -np -nH --cut-dirs=3 https://public.ukp.informatik.tu-darmstadt.de/kwang/dapr/v3/MIRACL/ -P ./data
+wget -r -np -nH --cut-dirs=3 https://public.ukp.informatik.tu-darmstadt.de/kwang/dapr/v3/ConditionalQA/ -P ./data
 ```
+
+## Updates
+- Nov. 16, 2023
+    - New version of data uploaded to https://public.ukp.informatik.tu-darmstadt.de/kwang/dapr/v3
+    - Replaced COLIEE with ConditionalQA
+        - ConditionalQA has two sub-versions here: (1) ConditionalQA, the original dataset; (2) CleanedConditionalQA whose html tags are removed.
+    - The MSMARCO dataset now segments the documents by keeping the labeled paragraphs while leaving the leftover parts as the other paragraphs.
+        - For example, given the document text "11122222334444566" and if the labeled paragraphs are "22222" and "4444", then the segmentations will be ["111", "22222", "33", "4444", "566"].
+        - For the candidate paragraphs, we only do retrieval over the labeled paragraphs, which is specified by the attribute "candidate_chunk_ids" of each document object.

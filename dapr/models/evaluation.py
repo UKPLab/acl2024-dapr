@@ -50,7 +50,7 @@ class LongDocumentEvaluator:
         data: LoadedData,
         results_dir: str,
         split: Split,
-        min_plabel: int,
+        min_plabel: int = 1,
         metrics: Tuple[str] = (
             RetrievalMetric.ndcg_string.at(10),
             RetrievalMetric.rr_string.at(10),
@@ -81,7 +81,11 @@ class LongDocumentEvaluator:
         self.qrels = LabeledQuery.build_qrels(self.labeled_queries)
         self.qrels_doc = LabeledQuery.build_qrels_doc(self.labeled_queries)
         self.ndocs = data.meta_data["ndocs"]
-        self.nchunks = data.meta_data["nchunks"]
+        self.nchunks = (
+            data.meta_data["nchunks"]
+            if data.meta_data.get("nchunks_candidates") is None
+            else data.meta_data["nchunks_candidates"]
+        )
         self.pool_identifier = data.meta_data["corpus_identifier"]
         self.logger = logging.getLogger(__name__)
 

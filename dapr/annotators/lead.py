@@ -1,7 +1,7 @@
 from itertools import chain
 from typing import Dict, List
 from dapr.annotators.base import BaseAnnotator
-from dapr.datasets.base import BaseDataset
+from dapr.datasets.base import LoadedData
 from dapr.datasets.dm import Document
 from nltk import sent_tokenize
 import nltk
@@ -23,13 +23,12 @@ class LeadingSentencesAnnotator(BaseAnnotator):
     def extract_doc_summary(self, doc: Document) -> str:
         return " ".join(self.extract_leading_sentences(doc))
 
-    def _annotate(self, dataset: BaseDataset) -> Dict[str, str]:
+    def _annotate(self, data: LoadedData) -> Dict[str, str]:
         try:
             nltk.data.find("tokenizers/punkt")
         except LookupError:
             nltk.download("punkt")
 
-        data = dataset.loaded_data
         assert data.corpus_iter_fn is not None
 
         did2dsum: Dict[str, str] = {}

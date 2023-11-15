@@ -8,6 +8,7 @@ from dapr.datasets.dm import Chunk, Document, JudgedChunk, LabeledQuery, Query
 import datasets
 from dapr.utils import (
     Multiprocesser,
+    concat_and_chunk,
     randomly_split_by_number,
     set_logger_format,
     tqdm_ropen,
@@ -248,6 +249,7 @@ class MIRACL(BaseDataset):
             document.chunks.append(chunk)
             if positive and query is not None:
                 judged_chunks.append(JudgedChunk(query=query, chunk=chunk, judgement=1))
+        document.set_default_candidates()
 
         if query is not None:
             return judged_chunks
