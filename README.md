@@ -103,7 +103,7 @@ The building processes above require relative large memory for the large dataset
 | MIRACL    | 69.7GB    |1h30min    |
 | ConditionalQA    |   | |
 
-To bypass this, one can also download the pre-built data for `NaturalQuestions`, `MSMARCO`, `MIRACL` and `Genomics`: 
+To bypass this, one can also download the pre-built data: 
 ```bash
 mkdir data
 wget -r -np -nH --cut-dirs=3 https://public.ukp.informatik.tu-darmstadt.de/kwang/dapr/v3/NaturalQuestions/ -P ./data
