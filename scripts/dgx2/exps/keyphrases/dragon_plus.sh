@@ -2,8 +2,6 @@ export NCCL_DEBUG="INFO"
 export CUDA_VISIBLE_DEVICES="1,2,9,10"
 
 datasets=( "ConditionalQA" "MSMARCO" "NaturalQuestions" "Genomics" "MIRACL" )
-# datasets=( "ConditionalQA" )
-# datasets=( "MIRACL" )
 for dataset in ${datasets[@]}
 do
     export DATA_DIR="data"

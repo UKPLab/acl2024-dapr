@@ -1,5 +1,4 @@
-# datasets=( "ConditionalQA" "MSMARCO" "NaturalQuestions" "Genomics" "MIRACL" )
-datasets=( "ConditionalQA" )
+datasets=( "ConditionalQA" "MSMARCO" "NaturalQuestions" "Genomics" "MIRACL" )
 for dataset in ${datasets[@]}
 do
     export DATA_DIR="data"

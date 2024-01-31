@@ -12,4 +12,3 @@ mkdir -p $OUTPUT_DIR
 export LOG_PATH="$OUTPUT_DIR/logging.log"
 echo "Logging file path: $LOG_PATH"
 setsid nohup torchrun --nproc_per_node=2 --master_port=29503 -m dapr.exps.passage_only.colbertv2 $CLI_ARGS > $LOG_PATH &
-# torchrun --nproc_per_node=4 --master_port=29502 -m dapr.exps.passage_only.colbertv2 $CLI_ARGS > $LOG_PATH

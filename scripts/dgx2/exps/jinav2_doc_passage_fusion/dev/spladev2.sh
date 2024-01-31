@@ -12,4 +12,3 @@ mkdir -p $OUTPUT_DIR
 export LOG_PATH="$OUTPUT_DIR/logging.log"
 echo "Logging file path: $LOG_PATH"
 torchrun --nproc_per_node=4 --master_port=29511 -m dapr.exps.jinav2_doc_passage_fusion.spladev2 $CLI_ARGS
-# setsid nohup torchrun --nproc_per_node=4 --master_port=29511 -m dapr.exps.jinav2_doc_passage_fusion.spladev2 $CLI_ARGS > $LOG_PATH &

@@ -2,7 +2,6 @@ export NCCL_DEBUG="INFO"
 export CUDA_VISIBLE_DEVICES="2,9,10,11"
 
 datasets=( "coref/ConditionalQA" "coref/MSMARCO" "coref/NaturalQuestions" "coref/Genomics" "coref/MIRACL" )
-# datasets=( "coref/ConditionalQA" )
 for dataset in ${datasets[@]}
 do
     export DATA_DIR="data"
