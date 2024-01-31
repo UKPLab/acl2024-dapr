@@ -141,5 +141,5 @@ ckpts
 
 data
 results
-exps
+/exps
 .DS_Store
