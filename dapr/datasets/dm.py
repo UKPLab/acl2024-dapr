@@ -1,4 +1,5 @@
 """Data models."""
+
 from __future__ import annotations
 from dataclasses import dataclass
 from functools import partial
@@ -92,9 +93,9 @@ class Document:
     doc_id: str
     chunks: List[Chunk]
     title: Optional[str]
-    candidate_chunk_ids: Optional[
-        Set[str]
-    ] = None  # Which chunks are candidates for retrieval. Mainly for MSMARCO
+    candidate_chunk_ids: Optional[Set[str]] = (
+        None  # Which chunks are candidates for retrieval. Mainly for MSMARCO
+    )
 
     def set_default_candidates(self) -> None:
         if self.candidate_chunk_ids is None:
@@ -159,9 +160,11 @@ class Document:
             "id": self.doc_id,
             "title": self.title,
             "chunks": [chunk.to_json() for chunk in self.chunks],
-            "candidate_chunk_ids": list(self.candidate_chunk_ids)
-            if self.candidate_chunk_ids is not None
-            else None,
+            "candidate_chunk_ids": (
+                list(self.candidate_chunk_ids)
+                if self.candidate_chunk_ids is not None
+                else None
+            ),
         }
 
     @classmethod

@@ -40,10 +40,12 @@ class Genomics(BaseDataset):
         if qrel_record is not None:
             assert qrel_record.qrel.relevance > 0
             marked = [
-                True
-                if (span.start, span.length)
-                == (qrel_record.qrel.start, qrel_record.qrel.length)
-                else False
+                (
+                    True
+                    if (span.start, span.length)
+                    == (qrel_record.qrel.start, qrel_record.qrel.length)
+                    else False
+                )
                 for span in hw_doc.spans
             ]
         judged_chunks = []
@@ -173,7 +175,5 @@ class Genomics(BaseDataset):
 
 
 if __name__ == "__main__":
-    import crash_ipdb
-
     set_logger_format()
     genomics = Genomics(resource_path="", nheldout=None)

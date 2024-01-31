@@ -180,8 +180,6 @@ class ConditionalQA(BaseDataset):
 
 
 if __name__ == "__main__":
-    import crash_ipdb
-
     set_logger_format()
     dataset = ConditionalQA(
         resource_path="https://raw.githubusercontent.com/haitian-sun/ConditionalQA/master/v1_0",

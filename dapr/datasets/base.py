@@ -127,9 +127,9 @@ class BaseDataset(ABC):
         loaded_data = self._load_data(nheldout)
         loaded_data.meta_data = {}
         loaded_data.meta_data["chunk_separator"] = self.chunk_separator
-        loaded_data.meta_data[
-            "corpus_identifier"
-        ] = f"{self.name}_{md5(map(lambda doc: str(doc.to_json()), loaded_data.corpus_iter_fn()))}"
+        loaded_data.meta_data["corpus_identifier"] = (
+            f"{self.name}_{md5(map(lambda doc: str(doc.to_json()), loaded_data.corpus_iter_fn()))}"
+        )
         stats = self.stats(loaded_data)
         loaded_data.meta_data.update(stats)
         self.check_heldout_in_corpus(loaded_data)

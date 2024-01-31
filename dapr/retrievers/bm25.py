@@ -34,9 +34,9 @@ class BM25:
     CORPUS_FOLDER = "corpus"
 
     def __init__(self) -> None:
-        os.environ[
-            "_JAVA_OPTIONS"
-        ] = "-Xmx5g"  # Otherwise it would cause to huge memory leak!
+        os.environ["_JAVA_OPTIONS"] = (
+            "-Xmx5g"  # Otherwise it would cause to huge memory leak!
+        )
 
     def index(
         self,

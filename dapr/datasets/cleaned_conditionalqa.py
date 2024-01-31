@@ -54,8 +54,6 @@ class CleanedConditionalQA(ConditionalQA):
 
 
 if __name__ == "__main__":
-    import crash_ipdb
-
     set_logger_format()
     dataset = CleanedConditionalQA(
         resource_path="https://raw.githubusercontent.com/haitian-sun/ConditionalQA/master/v1_0",

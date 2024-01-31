@@ -44,7 +44,9 @@ class QuestionRecord:
     long_answers: List[int]
     passage_types: List[PassageType]
 
-    record_id: str  # Can works as the query ID or the document ID: train/dev + line number
+    record_id: (
+        str  # Can works as the query ID or the document ID: train/dev + line number
+    )
 
     def get_candidate_ids(self) -> List[str]:
         """Unique identifier for a candidate. Can work as a passage ID."""
@@ -299,7 +301,6 @@ class NaturalQuestions(BaseDataset):
 
 
 if __name__ == "__main__":
-    import crash_ipdb
     from dapr.utils import set_logger_format
 
     set_logger_format()

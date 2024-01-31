@@ -75,12 +75,12 @@ class MSMARCO(BaseDataset):
 
     fcorpus: Optional[str] = None
     ftrain_qna: Optional[str] = None  # Will become the train split
-    fdev_qna: Optional[
-        str
-    ] = None  # Just for linking the TRECDL passages to the documents
-    feval_qna: Optional[
-        str
-    ] = None  # Just for linking the TRECDL passages to the documents
+    fdev_qna: Optional[str] = (
+        None  # Just for linking the TRECDL passages to the documents
+    )
+    feval_qna: Optional[str] = (
+        None  # Just for linking the TRECDL passages to the documents
+    )
     ftitles_pranking: Optional[str] = None
     fpassages_pranking: Optional[str] = None
     fqrels_small: Optional[str] = None  # Will become the test split
@@ -441,9 +441,9 @@ class MSMARCO(BaseDataset):
     ) -> Union[List[Document], Dict[str, List[JudgedChunk]]]:
         url2precords = self._build_url2precords(precords)
         corpus = []
-        qid2jchks: Dict[
-            str, List[JudgedChunk]
-        ] = {}  # Sometimes multiple records are labeled on the same document
+        qid2jchks: Dict[str, List[JudgedChunk]] = (
+            {}
+        )  # Sometimes multiple records are labeled on the same document
         for drecord in drecords:
             if drecord.url not in url2precords:
                 continue
@@ -685,8 +685,6 @@ class MSMARCO(BaseDataset):
 
 
 if __name__ == "__main__":
-    import crash_ipdb
-
     set_logger_format()
     msmarco = MSMARCO(
         # resource_path="https://msmarco.blob.core.windows.net",

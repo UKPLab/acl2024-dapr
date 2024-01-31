@@ -83,9 +83,9 @@ class MIRACL(BaseDataset):
                 "topics.miracl-v1.0-en-train.tsv",
             )
         else:
-            os.environ[
-                "HUGGING_FACE_HUB_TOKEN"
-            ] = "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"  # One needs set up the HF token https://huggingface.co/settings/tokens
+            os.environ["HUGGING_FACE_HUB_TOKEN"] = (
+                "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"  # One needs set up the HF token https://huggingface.co/settings/tokens
+            )
             dm_config = datasets.DownloadConfig(use_auth_token=True)
             dm = datasets.DownloadManager(download_config=dm_config)
             self.corpus_files = [
@@ -312,8 +312,6 @@ class MIRACL(BaseDataset):
 
 
 if __name__ == "__main__":
-    import crash_ipdb
-
     set_logger_format()
     dataset = MIRACL(
         resource_path="https://huggingface.co/datasets/miracl",
