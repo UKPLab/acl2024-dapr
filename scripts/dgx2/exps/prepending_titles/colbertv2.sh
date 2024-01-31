@@ -1,5 +1,5 @@
 export NCCL_DEBUG="INFO"
-export CUDA_VISIBLE_DEVICES="2,9,10,11"
+export CUDA_VISIBLE_DEVICES="0,1,2,3"
 
 datasets=( "ConditionalQA" "MSMARCO" "NaturalQuestions" "Genomics" "MIRACL" )
 for dataset in ${datasets[@]}

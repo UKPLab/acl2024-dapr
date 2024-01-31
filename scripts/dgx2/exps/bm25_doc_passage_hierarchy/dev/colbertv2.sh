@@ -1,4 +1,4 @@
-export CUDA_VISIBLE_DEVICES="5,6,7,8"
+export CUDA_VISIBLE_DEVICES="0,1,2,3"
 dataset="MSMARCO"
 export DATA_DIR="data"
 export DATASET_PATH="$DATA_DIR/$dataset"

@@ -1,4 +1,4 @@
-export CUDA_VISIBLE_DEVICES="1,2,4,9"
+export CUDA_VISIBLE_DEVICES="0,1,2,3"
 datasets=( "ConditionalQA" "MSMARCO" "NaturalQuestions" "Genomics" "MIRACL" )
 passage_results_paths=(
     "$(ls exps/passage_only/colbertv2/data_dir_data/ConditionalQA/split_test/topk_1000/per_device_eval_batch_size_32/fp16_True/*/ranking_results.txt|head -1)"

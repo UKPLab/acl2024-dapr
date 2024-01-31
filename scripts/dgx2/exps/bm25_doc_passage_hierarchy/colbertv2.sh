@@ -1,4 +1,4 @@
-export CUDA_VISIBLE_DEVICES="5,6,7,8"
+export CUDA_VISIBLE_DEVICES="0,1,2,3"
 
 datasets=( "ConditionalQA" "MSMARCO" "NaturalQuestions" "Genomics" "MIRACL" )
 for dataset in ${datasets[@]}
