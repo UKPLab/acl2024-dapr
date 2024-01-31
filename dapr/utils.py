@@ -56,7 +56,6 @@ from transformers import (
 )
 import multiprocessing as mp
 from multiprocessing.queues import Queue
-import wandb
 
 NINF = -1e4
 SOFT_ZERO = 1e-4
@@ -246,11 +245,6 @@ def switch(enable: bool):
         return new_func
 
     return decorator
-
-
-def wandb_report(to_report: dict) -> None:
-    for metric, score in to_report.items():
-        wandb.summary[metric] = score
 
 
 def hash_string_into_float(s: str, encoding: str = "utf-8"):
@@ -542,9 +536,9 @@ class Pooling(str, Enum):
             input_mask_expanded = (
                 attention_mask.unsqueeze(-1).expand(token_embeddings.size()).float()
             )
-            token_embeddings[
-                input_mask_expanded == 0
-            ] = -1e9  # Set padding tokens to large negative value
+            token_embeddings[input_mask_expanded == 0] = (
+                -1e9
+            )  # Set padding tokens to large negative value
             return torch.max(token_embeddings, 1)[0]
         elif self == Pooling.splade:
             pooled: torch.Tensor = getattr(

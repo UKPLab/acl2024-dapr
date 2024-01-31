@@ -1,0 +1,11 @@
+ColBERT @ git+https://github.com/stanford-futuredata/ColBERT.git@83658dcab6b48ec089c186508355b55efb6e2ba8
+ujson==5.7.0
+datasets==2.16.1
+more-itertools==9.1.0
+matplotlib==3.7.4
+pytrec-eval==0.5
+pke @ git+https://github.com/boudinfl/pke.git@ebd6e5754b4156a61a4ec6c4c283e821d11a36be
+ir-datasets==0.5.4
+pyserini==0.21.0
+transformers==4.37.2
+clddp==0.0.8
