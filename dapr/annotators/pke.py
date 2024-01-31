@@ -97,7 +97,7 @@ class PKEAnnotator(BaseAnnotator):
         doc_id2kps = extract_fn(data)
         did2dsum: Dict[str, str] = {}
         for doc in data.corpus_iter_fn():
-            doc_summary = " ".join(doc_id2kps[doc.doc_id])
+            doc_summary = "; ".join(doc_id2kps[doc.doc_id])
             did2dsum[doc.doc_id] = doc_summary
 
         for lqs in [
@@ -110,18 +110,20 @@ class PKEAnnotator(BaseAnnotator):
             for lq in lqs:
                 for jchk in lq.judged_chunks:
                     doc = jchk.chunk.belonging_doc
-                    doc_summary = " ".join(doc_id2kps[doc.doc_id])
+                    doc_summary = "; ".join(doc_id2kps[doc.doc_id])
                     did2dsum[doc.doc_id] = doc_summary
         return did2dsum
 
 
 if __name__ == "__main__":
-    from dapr.hydra_schemas.dataset import NaturalQuestionsConfig
+    import sys
+    from dapr.datasets.dm import LoadedData
+    from dapr.utils import set_logger_format
+    import logging
 
-    nq = NaturalQuestionsConfig()()
-
-    pke_summarizer = PKEAnnotator(10, KeyphraseApproach.topic_rank, 32, False)
-    pke_summarizer.annotate(nq)
-
-    doc_0: Document = next(nq.loaded_data.corpus_iter_fn())
-    print(doc_0.doc_id, doc_0.title, doc_0.chunks[0].doc_summary)
+    set_logger_format()
+    data_dir = sys.argv[1]
+    logging.info(f"Loading from {data_dir}")
+    data = LoadedData.from_dump(data_dir)
+    pke_summarizer = PKEAnnotator(10, KeyphraseApproach.topic_rank, 32)
+    pke_summarizer.annotate(data=data, cache_root_dir="pke")
