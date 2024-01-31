@@ -101,7 +101,7 @@ The building processes above require relative large memory for the large dataset
 | Genomics | 18.3GB     |25min    |
 | MSMARCO    | 102.9GB    |3h    |
 | MIRACL    | 69.7GB    |1h30min    |
-| ConditionalQA    |   | |
+| ConditionalQA    |  <1GB | <1min |
 
 To bypass this, one can also download the pre-built data: 
 ```bash
