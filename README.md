@@ -113,6 +113,28 @@ wget -r -np -nH --cut-dirs=3 https://public.ukp.informatik.tu-darmstadt.de/kwang
 wget -r -np -nH --cut-dirs=3 https://public.ukp.informatik.tu-darmstadt.de/kwang/dapr/v3/ConditionalQA/ -P ./data
 ```
 
+## Citation
+If you use the code for evaluation, feel free to cite our publication [DAPR: A Benchmark on Document-Aware Passage Retrieval](https://arxiv.org/abs/2305.13915):
+```bibtex 
+@article{wang2023dapr,
+    title = "DAPR: A Benchmark on Document-Aware Passage Retrieval",
+    author = "Kexin Wang and Nils Reimers and Iryna Gurevych", 
+    journal= "arXiv preprint arXiv:2305.13915",
+    year = "2023",
+    url = "https://arxiv.org/abs/2305.13915",
+}
+```
+
+Contact person and main contributor: [Kexin Wang](https://kwang2049.github.io/), kexin.wang.2049@gmail.com
+
+[https://www.ukp.tu-darmstadt.de/](https://www.ukp.tu-darmstadt.de/)
+
+[https://www.tu-darmstadt.de/](https://www.tu-darmstadt.de/)
+
+Don't hesitate to send us an e-mail or report an issue, if something is broken (and it shouldn't be) or if you have further questions.
+
+> This repository contains experimental software and is published for the sole purpose of giving additional background details on the respective publication.
+
 ## Updates
 - Nov. 16, 2023
     - New version of data uploaded to https://public.ukp.informatik.tu-darmstadt.de/kwang/dapr/v3
