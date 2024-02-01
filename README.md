@@ -112,6 +112,7 @@ wget -r -np -nH --cut-dirs=3 https://public.ukp.informatik.tu-darmstadt.de/kwang
 wget -r -np -nH --cut-dirs=3 https://public.ukp.informatik.tu-darmstadt.de/kwang/dapr/v3/MIRACL/ -P ./data
 wget -r -np -nH --cut-dirs=3 https://public.ukp.informatik.tu-darmstadt.de/kwang/dapr/v3/ConditionalQA/ -P ./data
 ```
+The data are also available at the Huggingface datasets: https://huggingface.co/datasets/kwang2049/dapr.
 
 ## Citation
 If you use the code for evaluation, feel free to cite our publication [DAPR: A Benchmark on Document-Aware Passage Retrieval](https://arxiv.org/abs/2305.13915):
