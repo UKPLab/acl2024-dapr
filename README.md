@@ -10,11 +10,18 @@ A key focus of DAPR is forcing/encouraging retrieval systems to utilize the docu
 
 > In this example, the query asks for a musician or a group who has ever played at a certain venue. However, the gold relevant passage mentions only the reference noun, "the venue" but its actual name, "the Half Moon, Putney". The model thus needs to explore the context from the belonging document of the passage, which in this case means coreference resolution.
 
-## Usage
+## Installation:
 Python>=3.8 is required. Run this installation script below:
 ```bash
 pip install git+https://github.com/kwang2049/dapr.git
 ```
+For the optional usage of BM25, please install JDK (`openjdk`>=11). One can install it via conda:
+```bash
+conda install openjdk=11
+```
+
+
+## Usage
 And then the evaluation data can be accessed by building it on the fly (from their original sources):
 ```python
 from dapr.hydra_schemas.dataset import NaturalQuestionsConfig
@@ -88,11 +95,7 @@ retrieved = [
 evaluation_scores = evaluator(retrieved=retrieved, level=RetrievalLevel.document).summary
 print(evaluation_scores)
 ```
-An example of the BM25 baseline is available:
-```
-bash bm25.sh
-```
-> It requires JDK (openjdk>=11). One can install it via conda by `conda install openjdk=11`.
+
 ## Pre-Built Data
 The building processes above require relative large memory for the large datasets. The loading part after this data building is cheap though (the collections will be loaded on the fly via Python generators). The budgets are listed below (with 12 multi-processes):
 | Dataset    | Memory |  Time |
