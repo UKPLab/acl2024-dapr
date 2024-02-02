@@ -8,7 +8,7 @@ from dapr.datasets.dm import Chunk, Document, JudgedChunk, LabeledQuery, Query
 import datasets
 from dapr.utils import (
     Multiprocesser,
-    concat_and_chunk,
+    Separator,
     randomly_split_by_number,
     set_logger_format,
     tqdm_ropen,
@@ -43,6 +43,19 @@ class MIRACL(BaseDataset):
     fqrels_dev: Optional[str] = None
     ftopics_train: Optional[str] = None
     ftopics_dev: Optional[str] = None
+
+    def __init__(
+        self,
+        resource_path: str = "https://huggingface.co/datasets/miracl",
+        nheldout: Optional[int] = None,
+        cache_root_dir: str = "data",
+        chunk_separator: Separator = Separator.empty,
+        tokenizer: str = "roberta-base",
+        nprocs: int = 10,
+    ) -> None:
+        super().__init__(
+            resource_path, nheldout, cache_root_dir, chunk_separator, tokenizer, nprocs
+        )
 
     def _download(self, resource_path: str) -> None:
         """The resource path should be something like https://huggingface.co/datasets/miracl."""
@@ -312,8 +325,7 @@ class MIRACL(BaseDataset):
 
 
 if __name__ == "__main__":
+    from dapr.utils import set_logger_format
+
     set_logger_format()
-    dataset = MIRACL(
-        resource_path="https://huggingface.co/datasets/miracl",
-        nheldout=None,
-    )
+    dataset = MIRACL()

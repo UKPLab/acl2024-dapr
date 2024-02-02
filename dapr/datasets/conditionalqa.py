@@ -1,15 +1,13 @@
 from __future__ import annotations
-from copy import deepcopy
 from dataclasses import replace
 import re
 from typing import List, Optional
 from dapr.datasets.dm import (
-    Chunk,
     Document,
     LabeledQuery,
     LoadedData,
 )
-from dapr.utils import set_logger_format
+from dapr.utils import Separator, set_logger_format
 from dapr.datasets.tagged_conditionalqa import TaggedConditionalQA
 import tqdm
 
@@ -18,6 +16,19 @@ class ConditionalQA(TaggedConditionalQA):
     """The cleaned version of ConditionalQA where the HTML tags have been removed. Used in the DAPR experiments."""
 
     HTML_TAG_PATTERN = re.compile("<.*?>")
+
+    def __init__(
+        self,
+        resource_path: str = "https://raw.githubusercontent.com/haitian-sun/ConditionalQA/master/v1_0",
+        nheldout: Optional[int] = None,
+        cache_root_dir: str = "data",
+        chunk_separator: Separator = Separator.empty,
+        tokenizer: str = "roberta-base",
+        nprocs: int = 10,
+    ) -> None:
+        super().__init__(
+            resource_path, nheldout, cache_root_dir, chunk_separator, tokenizer, nprocs
+        )
 
     def clean_document(self, doc: Document) -> Document:
         cloned_doc = replace(doc)
@@ -54,8 +65,7 @@ class ConditionalQA(TaggedConditionalQA):
 
 
 if __name__ == "__main__":
+    from dapr.utils import set_logger_format
+
     set_logger_format()
-    dataset = ConditionalQA(
-        resource_path="https://raw.githubusercontent.com/haitian-sun/ConditionalQA/master/v1_0",
-        nheldout=None,
-    )
+    dataset = ConditionalQA()

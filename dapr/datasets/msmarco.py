@@ -10,10 +10,10 @@ import datasets
 from dapr.datasets.base import BaseDataset, LoadedData
 from dapr.datasets.dm import Chunk, Document, JudgedChunk, LabeledQuery, Query, Split
 from dapr.utils import (
+    Separator,
     download,
     tqdm_ropen,
     Multiprocesser,
-    set_logger_format,
     cache_to_disk,
 )
 from datasets import DownloadManager
@@ -90,6 +90,19 @@ class MSMARCO(BaseDataset):
     ftrecdl20_qrels: Optional[str] = None
     max_mismatch: int = 5
     EMPTY_TITLES: Set[str] = {"", ".", "-"}
+
+    def __init__(
+        self,
+        resource_path: str = "https://msmarco.blob.core.windows.net",
+        nheldout: Optional[int] = None,
+        cache_root_dir: str = "data",
+        chunk_separator: Separator = Separator.empty,
+        tokenizer: str = "roberta-base",
+        nprocs: int = 10,
+    ) -> None:
+        super().__init__(
+            resource_path, nheldout, cache_root_dir, chunk_separator, tokenizer, nprocs
+        )
 
     def _download(self, resource_path: str) -> None:
         """The resource path should be something like https://msmarco.blob.core.windows.net."""
@@ -685,8 +698,7 @@ class MSMARCO(BaseDataset):
 
 
 if __name__ == "__main__":
+    from dapr.utils import set_logger_format
+
     set_logger_format()
-    msmarco = MSMARCO(
-        resource_path="https://msmarco.blob.core.windows.net",
-        nheldout=None,
-    )
+    msmarco = MSMARCO()

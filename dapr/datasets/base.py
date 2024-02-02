@@ -16,7 +16,7 @@ class BaseDataset(ABC):
     def __init__(
         self,
         resource_path: str,
-        nheldout: Optional[int],
+        nheldout: Optional[int] = None,
         cache_root_dir: str = "data",
         chunk_separator: Separator = Separator.empty,
         tokenizer: str = "roberta-base",

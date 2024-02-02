@@ -3,7 +3,7 @@ import re
 from typing import List, Optional, Set, Tuple, Union
 from dapr.datasets.base import BaseDataset, LoadedData
 from dapr.datasets.dm import Chunk, Document, JudgedChunk, LabeledQuery, Query
-from dapr.utils import Multiprocesser, set_logger_format
+from dapr.utils import Separator
 import ir_datasets
 from ir_datasets.datasets import highwire
 import tqdm
@@ -16,6 +16,19 @@ class QRelRecord:
 
 
 class Genomics(BaseDataset):
+    def __init__(
+        self,
+        resource_path: str = "",
+        nheldout: Optional[int] = None,
+        cache_root_dir: str = "data",
+        chunk_separator: Separator = Separator.empty,
+        tokenizer: str = "roberta-base",
+        nprocs: int = 10,
+    ) -> None:
+        super().__init__(
+            resource_path, nheldout, cache_root_dir, chunk_separator, tokenizer, nprocs
+        )
+
     def _download(self, resource_path: str) -> None:
         pass
 
@@ -175,5 +188,7 @@ class Genomics(BaseDataset):
 
 
 if __name__ == "__main__":
+    from dapr.utils import set_logger_format
+
     set_logger_format()
-    genomics = Genomics(resource_path="", nheldout=None)
+    genomics = Genomics()

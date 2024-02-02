@@ -8,6 +8,7 @@ from typing import Iterator, List, Optional, Set, Union
 import tqdm
 from dapr.utils import (
     Multiprocesser,
+    Separator,
     tqdm_ropen,
     randomly_split_by_number,
 )
@@ -140,6 +141,19 @@ class NaturalQuestions(BaseDataset):
 
     ftrain: Optional[str] = None
     fdev: Optional[str] = None
+
+    def __init__(
+        self,
+        resource_path: str = "https://huggingface.co/datasets/sentence-transformers/NQ-retrieval",
+        nheldout: Optional[int] = None,
+        cache_root_dir: str = "data",
+        chunk_separator: Separator = Separator.empty,
+        tokenizer: str = "roberta-base",
+        nprocs: int = 10,
+    ) -> None:
+        super().__init__(
+            resource_path, nheldout, cache_root_dir, chunk_separator, tokenizer, nprocs
+        )
 
     def _download(self, resource_path: str) -> None:
         """The resource path should be something like https://huggingface.co/datasets/sentence-transformers/NQ-retrieval."""
@@ -303,10 +317,4 @@ if __name__ == "__main__":
     from dapr.utils import set_logger_format
 
     set_logger_format()
-    resource_path = "https://huggingface.co/datasets/sentence-transformers/NQ-retrieval"
-
-    # Load real data and log stats:
-    nq = NaturalQuestions(
-        resource_path=resource_path,
-        nheldout=None,
-    )
+    nq = NaturalQuestions()
