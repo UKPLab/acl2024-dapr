@@ -687,7 +687,6 @@ class MSMARCO(BaseDataset):
 if __name__ == "__main__":
     set_logger_format()
     msmarco = MSMARCO(
-        # resource_path="https://msmarco.blob.core.windows.net",
-        resource_path="/home/fb20user07/research/msmarco/all",
+        resource_path="https://msmarco.blob.core.windows.net",
         nheldout=None,
     )

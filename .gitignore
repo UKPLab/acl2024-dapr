@@ -143,3 +143,5 @@ data
 results
 /exps
 .DS_Store
+
+/load.py

@@ -10,7 +10,6 @@ from dapr.utils import (
     Multiprocesser,
     tqdm_ropen,
     randomly_split_by_number,
-    concat_and_chunk,
 )
 from dapr.datasets.dm import (
     Document,
@@ -304,45 +303,10 @@ if __name__ == "__main__":
     from dapr.utils import set_logger_format
 
     set_logger_format()
-    resource_path = "/home/fb20user07/research/nils-nq/NQ-retrieval"
-    # resource_path = "https://huggingface.co/datasets/sentence-transformers/NQ-retrieval"
+    resource_path = "https://huggingface.co/datasets/sentence-transformers/NQ-retrieval"
 
     # Load real data and log stats:
     nq = NaturalQuestions(
         resource_path=resource_path,
         nheldout=None,
-        cache_loaded=True,
     )
-
-    # Now generate sample data:
-    from unittest import mock
-
-    output_dir = os.path.join("sample-data", nq.name)
-    if not os.path.exists(output_dir):
-        mock_load_data = mock.patch.object(
-            NaturalQuestions, "_load_data", return_value=None
-        )
-        mock_stats = mock.patch.object(NaturalQuestions, "stats", return_value=None)
-        with mock_load_data, mock_stats:
-            nq = NaturalQuestions(
-                resource_path=resource_path,
-                nheldout=None,
-            )
-            os.makedirs(output_dir, exist_ok=True)
-            for fsplit, fpath, split, nsamples in [
-                ("dev.tsv", nq.fdev, Split.dev, 3),
-                ("train.tsv", nq.ftrain, Split.train, 6),
-            ]:
-                with open(os.path.join(output_dir, fsplit), "w") as fout:
-                    with open(fpath, "r") as fin:
-                        sampled = []
-                        for line_number, line in enumerate(fin):
-                            qrecord = QuestionRecord.from_line(line, split, line_number)
-                            if qrecord.has_text_long_answer():
-                                if qrecord.has_in_doc_negative():
-                                    sampled.append(line)
-                            if len(sampled) >= nsamples:
-                                break
-
-                        for line in sampled:
-                            fout.write(line)

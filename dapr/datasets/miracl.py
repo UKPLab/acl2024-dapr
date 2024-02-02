@@ -316,25 +316,4 @@ if __name__ == "__main__":
     dataset = MIRACL(
         resource_path="https://huggingface.co/datasets/miracl",
         nheldout=None,
-        cache_loaded=True,
-        max_nchunks=None,
     )
-
-# {
-#     "name": "MIRACL",
-#     "#docs": 5758285,
-#     "#chks": 10887521,
-#     "#chks percentiles": {
-#         "5": 1.0,
-#         "25": 1.0,
-#         "50": 1.0,
-#         "75": 2.0,
-#         "95": 5.0
-#     },
-#     "#train queries": 2064,
-#     "#Judged per query (train)": 3.2,
-#     "#dev queries": 799,
-#     "#Judged per query (dev)": 3.08,
-#     "#test queries": 799,
-#     "#Judged per query (test)": 3.38
-# }
