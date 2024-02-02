@@ -33,7 +33,7 @@ from dapr.datasets.dm import LoadedData
 
 # Build the data on the fly: (this will save the data to ./data/ConditionalQA)
 data = ConditionalQA().loaded_data  # Also the same for NaturalQuestions, etc.
-# data = LoadedData.from_dump("data/ConditionalQA")  # Load the pre-built data (please download it from https://public.ukp.informatik.tu-darmstadt.de/kwang/dapr/v3/ConditionalQA)
+# data = LoadedData.from_dump("data/ConditionalQA")  # Load the pre-built data (please download it from https://public.ukp.informatik.tu-darmstadt.de/kwang/dapr/data/ConditionalQA)
 
 # Iterate over the corpus:
 for doc in data.corpus_iter_fn():
@@ -153,11 +153,11 @@ The building processes above require relative large memory for the large dataset
 To bypass this, one can also download the pre-built data: 
 ```bash
 mkdir data
-wget -r -np -nH --cut-dirs=3 https://public.ukp.informatik.tu-darmstadt.de/kwang/dapr/v3/NaturalQuestions/ -P ./data
-wget -r -np -nH --cut-dirs=3 https://public.ukp.informatik.tu-darmstadt.de/kwang/dapr/v3/MSMARCO/ -P ./data
-wget -r -np -nH --cut-dirs=3 https://public.ukp.informatik.tu-darmstadt.de/kwang/dapr/v3/Genomics/ -P ./data
-wget -r -np -nH --cut-dirs=3 https://public.ukp.informatik.tu-darmstadt.de/kwang/dapr/v3/MIRACL/ -P ./data
-wget -r -np -nH --cut-dirs=3 https://public.ukp.informatik.tu-darmstadt.de/kwang/dapr/v3/ConditionalQA/ -P ./data
+wget -r -np -nH --cut-dirs=3 https://public.ukp.informatik.tu-darmstadt.de/kwang/dapr/data/NaturalQuestions/ -P ./data
+wget -r -np -nH --cut-dirs=3 https://public.ukp.informatik.tu-darmstadt.de/kwang/dapr/data/MSMARCO/ -P ./data
+wget -r -np -nH --cut-dirs=3 https://public.ukp.informatik.tu-darmstadt.de/kwang/dapr/data/Genomics/ -P ./data
+wget -r -np -nH --cut-dirs=3 https://public.ukp.informatik.tu-darmstadt.de/kwang/dapr/data/MIRACL/ -P ./data
+wget -r -np -nH --cut-dirs=3 https://public.ukp.informatik.tu-darmstadt.de/kwang/dapr/data/ConditionalQA/ -P ./data
 ```
 The data are also available at the Huggingface datasets: https://huggingface.co/datasets/kwang2049/dapr.
 
@@ -185,7 +185,7 @@ Don't hesitate to send us an e-mail or report an issue, if something is broken (
 
 ## Updates
 - Nov. 16, 2023
-    - New version of data uploaded to https://public.ukp.informatik.tu-darmstadt.de/kwang/dapr/v3
+    - New version of data uploaded to https://public.ukp.informatik.tu-darmstadt.de/kwang/dapr/data
     - Replaced COLIEE with ConditionalQA
         - ConditionalQA has two sub-versions here: (1) ConditionalQA, the original dataset; (2) CleanedConditionalQA whose html tags are removed.
     - The MSMARCO dataset now segments the documents by keeping the labeled paragraphs while leaving the leftover parts as the other paragraphs.
