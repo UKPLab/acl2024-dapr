@@ -20,7 +20,6 @@ class BaseDataset(ABC):
         cache_root_dir: str = "data",
         chunk_separator: Separator = Separator.empty,
         tokenizer: str = "roberta-base",
-        chunk_size: int = 384,
         nprocs: int = 10,
     ) -> None:
         self.kwargs = dict(inspect.getargvalues(inspect.currentframe()).locals)
@@ -30,7 +29,6 @@ class BaseDataset(ABC):
         self.resource_path = resource_path
         self.chunk_separator = chunk_separator
         self.tokenizer = AutoTokenizer.from_pretrained(tokenizer)
-        self.chunk_size = chunk_size
         self.nprocs = nprocs
         cache_dir = os.path.join(cache_root_dir, self.name)
         if os.path.exists(cache_dir) and os.listdir(cache_dir):
