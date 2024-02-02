@@ -13,5 +13,5 @@ do
     mkdir -p $OUTPUT_DIR
     export LOG_PATH="$OUTPUT_DIR/logging.log"
     echo "Logging file path: $LOG_PATH"
-    torchrun --nproc_per_node=4 --master_port=29502 -m dapr.exps.prepending_titles.spladev2 $CLI_ARGS > $LOG_PATH
+    torchrun --nproc_per_node=4 --master_port=29501 -m dapr.exps.prepending_titles.spladev2 $CLI_ARGS > $LOG_PATH
 done

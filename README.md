@@ -22,78 +22,122 @@ conda install openjdk=11
 
 
 ## Usage
-And then the evaluation data can be accessed by building it on the fly (from their original sources):
+### Building/loading data
 ```python
-from dapr.hydra_schemas.dataset import NaturalQuestionsConfig
-## Other datasets can be imported similarly:
-# from dapr.hydra_schemas.dataset import MSMARCOConfig
-# from dapr.hydra_schemas.dataset import GenomicsConfig
-# from dapr.hydra_schemas.dataset import MIRACLConfig
-# from dapr.hydra_schemas.dataset import CleanedConditionalQA
+from dapr.datasets.conditionalqa import ConditionalQA
+from dapr.datasets.nq import NaturalQuestions
+from dapr.datasets.genomics import Genomics
+from dapr.datasets.miracl import MIRACL
+from dapr.datasets.msmarco import MSMARCO
+from dapr.datasets.dm import LoadedData
 
-dataset = NaturalQuestionsConfig(cache_root_dir="data")()
-for doc in dataset.loaded_data.corpus_iter_fn():
+# Build the data on the fly: (this will save the data to ./data/ConditionalQA)
+data = ConditionalQA().loaded_data  # Also the same for NaturalQuestions, etc.
+# data = LoadedData.from_dump("data/ConditionalQA")  # Load the pre-built data (please download it from https://public.ukp.informatik.tu-darmstadt.de/kwang/dapr/v3/ConditionalQA)
+
+# Iterate over the corpus:
+for doc in data.corpus_iter_fn():
+    doc.doc_id
+    doc.title
     for chunk in doc.chunks:
-        (chunk.chunk_id, chunk.text)
+        chunk.chunk_id
+        chunk.text
+        chunk.belonging_doc.doc_id
 
-for labeled_query in dataset.loaded_data.labeled_queries_test:
+# Iterate over the labeled queries (of the test split):
+for labeled_query in data.labeled_queries_test:
+    labeled_query.query.query_id
+    labeled_query.query.text
     for judged_chunk in labeled_query.judged_chunks:
-        (
-            labeled_query.query.query_id, 
-            labeled_query.query.text, 
-            judged_chunk.chunk.chunk_id, 
-            judged_chunk.chunk.text, 
-            judged_chunk.judgement
-        )
+        judged_chunk.chunk.chunk_id
+        judged_chunk.chunk.text
+        judged_chunk.chunk.belonging_doc.doc_id
 ```
 
-For evaluation, an example is as follows:
+### Evaluation 
 ```python
-from dapr.models.evaluation import LongDocumentEvaluator
-from dapr.datasets.dm import Split
-from dapr.models.dm import RetrievalLevel, RetrievedChunkList, ScoredChunk
-from dapr.hydra_schemas.dataset import NaturalQuestionsConfig
+from typing import Dict
+from dapr.retrievers.dense import DRAGONPlus
+from dapr.datasets.conditionalqa import ConditionalQA
+from clddp.dm import Query, Passage
+import torch
+import pytrec_eval
+import numpy as np
 
-dataset = NaturalQuestionsConfig()()
-evaluator = LongDocumentEvaluator(data=dataset.load_data, results_dir="results", split=Split.test)
-retrieved = [
-    RetrievedChunkList(query_id="query0", scored_chunks=[
-        ScoredChunk(chunk_id="doc0-chunk0", doc_id="doc0", score=4.0),
-        ScoredChunk(chunk_id="doc3-chunk5", doc_id="doc3", score=3.0),
-        ScoredChunk(chunk_id="doc2-chunk4", doc_id="doc2", score=1.0),
-    ]),
-    RetrievedChunkList(query_id="query1", scored_chunks=[
-        ScoredChunk(chunk_id="doc7-chunk6", doc_id="doc7", score=9.0),
-        ScoredChunk(chunk_id="doc4-chunk3", doc_id="doc4", score=5.0),
-        ScoredChunk(chunk_id="doc1-chunk0", doc_id="doc1", score=2.0),
-    ]),
+# Load data:
+data = ConditionalQA().loaded_data
+
+# Encode queries and passages:
+retriever = DRAGONPlus()
+retriever.eval()
+queries = [
+    Query(query_id=labeled_query.query.query_id, text=labeled_query.query.text)
+    for labeled_query in data.labeled_queries_test
 ]
-evaluation_scores = evaluator(retrieved=retrieved, level=RetrievalLevel.chunk).summary
-print(evaluation_scores)
+passages = [
+    Passage(passage_id=chunk.chunk_id, text=chunk.text)
+    for doc in data.corpus_iter_fn()
+    for chunk in doc.chunks
+]
+query_embeddings = retriever.encode_queries(queries)
+with torch.no_grad():  # Takes around a minute on a V100 GPU
+    passage_embeddings, passage_mask = retriever.encode_passages(passages)
+
+# Calculate the similarities and keep top-K:
+similarity_scores = torch.matmul(
+    query_embeddings, passage_embeddings.t()
+)  # (query_num, passage_num)
+topk = torch.topk(similarity_scores, k=10)
+topk_values: torch.Tensor = topk[0]
+topk_indices: torch.LongTensor = topk[1]
+topk_value_lists = topk_values.tolist()
+topk_index_lists = topk_indices.tolist()
+
+# Run evaluation with pytrec_eval:
+retrieval_scores: Dict[str, Dict[str, float]] = {}
+for query_i, (values, indices) in enumerate(zip(topk_value_lists, topk_index_lists)):
+    query_id = queries[query_i].query_id
+    retrieval_scores.setdefault(query_id, {})
+    for value, passage_i in zip(values, indices):
+        passage_id = passages[passage_i].passage_id
+        retrieval_scores[query_id][passage_id] = value
+qrels: Dict[str, Dict[str, int]] = {
+    labeled_query.query.query_id: {
+        judged_chunk.chunk.chunk_id: judged_chunk.judgement
+        for judged_chunk in labeled_query.judged_chunks
+    }
+    for labeled_query in data.labeled_queries_test
+}
+evaluator = pytrec_eval.RelevanceEvaluator(
+    query_relevance=qrels, measures=["ndcg_cut_10"]
+)
+query_performances: Dict[str, Dict[str, float]] = evaluator.evaluate(retrieval_scores)
+ndcg = np.mean([score["ndcg_cut_10"] for score in query_performances.values()])
+print(ndcg)  # 0.21796083196880855
 ```
-The evaluation for document retrieval is also available:
-```python
-from dapr.models.evaluation import LongDocumentEvaluator
-from dapr.datasets.dm import Split
-from dapr.models.dm import RetrievalLevel, RetrievedDocumentList, ScoredDocument
-from dapr.hydra_schemas.dataset import NaturalQuestionsConfig
 
-dataset = NaturalQuestionsConfig()()
-evaluator = LongDocumentEvaluator(data=dataset.load_data, results_dir="results", split=Split.test)
-retrieved = [
-    RetrievedDocumentList(query_id="query0", scored_documents=[
-        ScoredDocument(doc_id="doc0", score=4.0),
-        ScoredDocument(doc_id="doc3", score=3.0),
-        ScoredDocument(chunk_id="doc2-chunk4", doc_id="doc2", score=1.0),
-    ]),
-    RetrievedDocumentList(query_id="query1", scored_documents=[
-        ScoredDocument(doc_id="doc7", score=9.0),
-        ScoredDocument(doc_id="doc4", score=5.0),
-        ScoredDocument(doc_id="doc1", score=2.0),
-    ]),
-]
-evaluation_scores = evaluator(retrieved=retrieved, level=RetrievalLevel.document).summary
-print(evaluation_scores)
+### Reproducing experiment results
+All the experiment scripts are available at [scripts/dgx2/exps](scripts/dgx2/exps). For example, one can evaluate the DRAGON+ retriever in a passage-only manner like this:
+```bash
+# scripts/dgx2/exps/passage_only/dragon_plus.sh
+export NCCL_DEBUG="INFO"
+export CUDA_VISIBLE_DEVICES="0,1,2,3"
+
+datasets=( "ConditionalQA" )
+# datasets=( "ConditionalQA" "MSMARCO" "NaturalQuestions" "Genomics" "MIRACL" )
+for dataset in ${datasets[@]}
+do
+    export DATA_DIR="data"
+    export DATASET_PATH="$DATA_DIR/$dataset"
+    export CLI_ARGS="
+    --data_dir=$DATASET_PATH
+    "
+    export OUTPUT_DIR=$(python -m dapr.exps.passage_only.args.dragon_plus $CLI_ARGS)
+    mkdir -p $OUTPUT_DIR
+    export LOG_PATH="$OUTPUT_DIR/logging.log"
+    echo "Logging file path: $LOG_PATH"
+    torchrun --nproc_per_node=4 --master_port=29501 -m dapr.exps.passage_only.dragon_plus $CLI_ARGS > $LOG_PATH
+done
 ```
 
 ## Pre-Built Data

@@ -11,4 +11,4 @@ export OUTPUT_DIR=$(python -m dapr.exps.passage_only.args.spladev2 $CLI_ARGS)
 mkdir -p $OUTPUT_DIR
 export LOG_PATH="$OUTPUT_DIR/logging.log"
 echo "Logging file path: $LOG_PATH"
-setsid nohup torchrun --nproc_per_node=2 --master_port=29509 -m dapr.exps.passage_only.spladev2 $CLI_ARGS > $LOG_PATH &
+setsid nohup torchrun --nproc_per_node=2 --master_port=29501 -m dapr.exps.passage_only.spladev2 $CLI_ARGS > $LOG_PATH &
