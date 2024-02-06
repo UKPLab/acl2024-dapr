@@ -162,7 +162,7 @@ wget -r -np -nH --cut-dirs=3 https://public.ukp.informatik.tu-darmstadt.de/kwang
 The data are also available at the Huggingface datasets: https://huggingface.co/datasets/kwang2049/dapr.
 
 ## Citation
-If you use the code for evaluation, feel free to cite our publication [DAPR: A Benchmark on Document-Aware Passage Retrieval](https://arxiv.org/abs/2305.13915):
+If you use the code/data, feel free to cite our publication [DAPR: A Benchmark on Document-Aware Passage Retrieval](https://arxiv.org/abs/2305.13915):
 ```bibtex 
 @article{wang2023dapr,
     title = "DAPR: A Benchmark on Document-Aware Passage Retrieval",
@@ -184,6 +184,11 @@ Don't hesitate to send us an e-mail or report an issue, if something is broken (
 > This repository contains experimental software and is published for the sole purpose of giving additional background details on the respective publication.
 
 ## Updates
+- Feb. 06. 2023
+    - Rename the folder name from v3 into data in the fileserver.
+    - Uploaded other data like coference-resolution results, extracted keyphrases, and the experiment results.
+    - Created the HF datasets.
+    - Refactored the experiment code, aligning with the new paper version.
 - Nov. 16, 2023
     - New version of data uploaded to https://public.ukp.informatik.tu-darmstadt.de/kwang/dapr/data
     - Replaced COLIEE with ConditionalQA
