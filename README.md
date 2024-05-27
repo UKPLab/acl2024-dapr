@@ -1,6 +1,6 @@
 # Document-Aware Passage Retrieval (DAPR)
-
-Paper draft: https://arxiv.org/abs/2305.13915 (work in progress)
+[![arXiv](https://img.shields.io/badge/arXiv-2305.13915-b31b1b.svg)](https://arxiv.org/abs/2305.13915)
+[![The Vault on HuggingFace datasets](https://img.shields.io/badge/%F0%9F%A4%97%20Datasets-UKPLab/dapr-yellow?style=flat)](https://huggingface.co/datasets/UKPLab/dapr)
 
 DAPR is a benchmark for document-aware passage retrieval: given a (large) collection of documents, relevant passages within these documents for a given query are required to be returned. 
 
@@ -184,7 +184,9 @@ Don't hesitate to send us an e-mail or report an issue, if something is broken (
 > This repository contains experimental software and is published for the sole purpose of giving additional background details on the respective publication.
 
 ## Updates
-- Feb. 06. 2023
+- May 16, 2024
+    - Accepted by ACL 2024 Main
+- Feb. 06, 2023
     - Rename the folder name from v3 into data in the fileserver.
     - Uploaded other data like coference-resolution results, extracted keyphrases, and the experiment results.
     - Created the HF datasets.
